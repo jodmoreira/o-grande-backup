@@ -23,8 +23,6 @@ def add_new_profile(data):
     query = """INSERT INTO profiles (screen_name, user_id) VALUES (?,?)"""
     c.execute(query, data)
     conn.commit()
-create_tb_profiles()
-add_new_profile(('teste','maoe'))
 
 def read_profiles():
     c.execute(
@@ -32,4 +30,6 @@ def read_profiles():
     )
     rows = c.fetchall()
     return rows
-print(read_profiles())
+
+if __name__ == '__main__':
+    create_tb_profiles()

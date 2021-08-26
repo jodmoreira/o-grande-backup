@@ -1,9 +1,11 @@
 import boto3
-from datetime import datetime
+import json
 
+s3 = boto3.client('s3')
 
-cli = boto3.client('s3')
-cli.put_object(
-  Body='The time now is '+str(datetime.now()),
-  Bucket='ogb-dados-gerais',
-  Key='ec2.txt')
+def upload(content):
+    s3.put_object(Body=(bytes(json.dumps(content).encode('UTF-8'))),
+    Bucket='ogb-dados-gerais',
+    Key=f'{content["user"]["screen_name"]}\
+    /{content["user"]["screen_name"]}_{content["id_str"]}.json',
+    StorageClass='STANDARD_IA')

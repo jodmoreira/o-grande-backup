@@ -1,0 +1,5 @@
+# YouTube Video: https://www.youtube.com/watch?v=wlnx-7cm4Gg
+ACCESS_TOKEN = '24761859-DT1ryhr0kXOn5hEXKR5rpOFAsz8BD2HVL0syNVHxa'
+ACCESS_TOKEN_SECRET = 'kdiyHezjMIjs0WSJ3hb0UxWs6BaFhbst4KZF8L78LvVsN'
+CONSUMER_KEY = 'TJCuklSOuVcjbYCry6xy2S1yS'
+CONSUMER_SECRET = 'tUJa7BrrtEP5kHj1v7UjBx8jwrc6wJEECSQpTBK8Rx7KzPC3iT'
