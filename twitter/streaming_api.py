@@ -3,7 +3,8 @@ import tweepy
 import json
 import s3
 import database
-
+from datetime import datetime, timedelta
+import time
 
 
 class OgbListener(tweepy.StreamListener):
@@ -11,8 +12,15 @@ class OgbListener(tweepy.StreamListener):
         content = status._json
         if content['text'].startswith("RT @") == False\
         and content['in_reply_to_user_id'] == None:
-            print(f'new tweet from {content["user"]["screen_name"]}')
+            #Just to adjust to my current timezone
+            print(f'''new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}''')
             s3.upload(content)
+    def on_error(self, status_code):
+        if status_code == 420:
+            time.sleep(10)
+            print(f'Timeout at {str(datetime.now())}')
+            return True
+
 
 if __name__ == '__main__':
     auth = tweepy.OAuthHandler(twitter_credentials.CONSUMER_KEY,

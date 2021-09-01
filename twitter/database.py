@@ -20,9 +20,16 @@ def create_tb_profiles():
         pass
 
 def add_new_profile(data):
-    query = """INSERT INTO profiles (screen_name, user_id) VALUES (?,?)"""
-    c.execute(query, data)
-    conn.commit()
+    screen_name = (data[0],)
+    query = "SELECT * FROM profiles WHERE screen_name = ?"
+    c.execute(query,screen_name)
+    if c.fetchone() == None:
+        query = """INSERT INTO profiles (screen_name, user_id) VALUES (?,?)"""
+        c.execute(query, data)
+        conn.commit()
+        return 'Done!'
+    else:
+        return 'Not updating. User already in database'
 
 def read_profiles():
     c.execute(
@@ -32,4 +39,4 @@ def read_profiles():
     return rows
 
 if __name__ == '__main__':
-    create_tb_profiles()
+    add_new_profile()

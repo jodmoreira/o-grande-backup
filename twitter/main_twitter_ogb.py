@@ -7,6 +7,7 @@ import time
 import os
 import traceback
 import json
+import s3
 
 auth = OAuthHandler(twitter_credentials.CONSUMER_KEY, twitter_credentials.CONSUMER_SECRET)
 api = API(auth)
@@ -97,7 +98,8 @@ def looper(ultimo_id, novo_usuario):
     for tweet in tweets:
         id_tweet = tweet.id
         print(f'{id_tweet} de {novo_usuario}')
-        escritor(tweet, novo_usuario)
+        # escritor(tweet, novo_usuario)
+        s3.upload(tweet._json)
         ultimo_id = id_tweet-1
     try:
         looper(ultimo_id, novo_usuario)
@@ -114,7 +116,8 @@ def primeira_execucao(novo_usuario):
     for tweet in api.user_timeline(id=novo_usuario, tweet_mode='extended', count=200):
         id_tweet = tweet.id
         print(f'{id_tweet} de {novo_usuario}')
-        escritor(tweet, novo_usuario)
+        # escritor(tweet, novo_usuario)
+        s3.upload(tweet._json)
         ultimo_id = id_tweet-1
     looper(ultimo_id, novo_usuario)
 
