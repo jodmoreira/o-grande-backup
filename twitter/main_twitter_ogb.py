@@ -6,30 +6,29 @@ import twitter_credentials
 import time
 import json
 import s3
-import datetime
 
 auth = OAuthHandler(twitter_credentials.CONSUMER_KEY, twitter_credentials.CONSUMER_SECRET)
 api = API(auth)
 
 
 ##### For the first execution #####
-def looper(ultimo_id, new_user):
-    tweets = api.user_timeline(id=new_user, tweet_mode='extended', count=200, max_id=ultimo_id)
+def looper(last_id, new_user):
+    tweets = api.user_timeline(id=new_user, tweet_mode='extended', count=200, max_id=last_id)
     if len(tweets) < 1:
         return
     for tweet in tweets:
         id_tweet = tweet.id
         print(f'{id_tweet} from {new_user}')
-        s3.upload(tweet._json)
-        ultimo_id = id_tweet-1
+        s3.uploader(tweet._json)
+        last_id = id_tweet-1
     try:
         print('Going to new item')
-        looper(ultimo_id, new_user)
+        looper(last_id, new_user)
     except Exception as e:
         print(e)
         print('sleep')
         time.sleep(15*60)
-        looper(ultimo_id, new_user)
+        looper(last_id, new_user)
 
 def first_execution(new_user):
     '''
@@ -39,7 +38,7 @@ def first_execution(new_user):
     for tweet in api.user_timeline(id=new_user, tweet_mode='extended', count=200):
         id_tweet = tweet.id
         print(f'{id_tweet} from {new_user}')
-        s3.upload(tweet._json)
+        s3.uploader(tweet._json)
         last_id = id_tweet-1
     looper(last_id, new_user)
 

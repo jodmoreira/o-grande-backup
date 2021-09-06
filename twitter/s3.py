@@ -3,7 +3,7 @@ import json
 
 s3 = boto3.client('s3')
 
-def upload(content):
+def uploader(content):
     screen_name = str(content["user"]["screen_name"])
     screen_name = screen_name.replace(' ','')
     s3.put_object(Body=(bytes(json.dumps(content).encode('UTF-8'))),
@@ -27,3 +27,6 @@ def downloader(key, prefix=None):
         response = s3.download_file('ogb-dados-gerais', file_name, file_name)
         print(f'Downloading {file_name}')
 
+def list_all_folders_from_landing_zone():
+    all_objects = s3.list_objects_v2(Bucket = 'ogb-dados-gerais', Prefix='*/$', MaxKeys=1000)
+    print(all_objects)
