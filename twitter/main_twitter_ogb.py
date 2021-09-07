@@ -35,13 +35,17 @@ def first_execution(new_user):
     Runs the frist API loop and returns the first 200 tweets and
     then starts looping
     '''
-    for tweet in api.user_timeline(id=new_user, tweet_mode='extended', count=200):
-        id_tweet = tweet.id
-        print(f'{id_tweet} from {new_user}')
-        s3.uploader(tweet._json)
-        last_id = id_tweet-1
-    looper(last_id, new_user)
-
+    try:
+        tweets = api.user_timeline(id=new_user, tweet_mode='extended', count=200)
+        for tweet in tweets:
+            id_tweet = tweet.id
+            print(f'{id_tweet} from {new_user}')
+            s3.uploader(tweet._json)
+            last_id = id_tweet-1
+        looper(last_id, new_user)
+    except tweepy.TweepError:
+        print(f'Unable to get data because {new_user} is not available')
+        pass
 def get_user_id(screen_name):
     id = api.get_user(screen_name).id
     return id

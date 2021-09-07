@@ -27,6 +27,5 @@ def downloader(key, prefix=None):
         response = s3.download_file('ogb-dados-gerais', file_name, file_name)
         print(f'Downloading {file_name}')
 
-def list_all_folders_from_landing_zone():
-    all_objects = s3.list_objects_v2(Bucket = 'ogb-dados-gerais', Prefix='*/$', MaxKeys=1000)
-    print(all_objects)
+if __name__ == '__main__':
+    list_all_folders_from_landing_zone()

@@ -33,10 +33,10 @@ def add_new_profile(data):
 
 def read_profiles():
     c.execute(
-        """SELECT * FROM profiles""",
+        """SELECT * FROM profiles WHERE rowid > 49 ORDER BY rowid ASC""",
     )
     rows = c.fetchall()
     return rows
 
 if __name__ == '__main__':
-    add_new_profile()
+    print(read_profiles())
