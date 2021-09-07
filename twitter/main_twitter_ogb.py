@@ -42,7 +42,7 @@ def first_execution(new_user):
             print(f'{id_tweet} from {new_user}')
             s3.uploader(tweet._json)
             last_id = id_tweet-1
-        looper(last_id, new_user)
+        # looper(last_id, new_user)
     except tweepy.TweepError:
         print(f'Unable to get data because {new_user} is not available')
         pass
