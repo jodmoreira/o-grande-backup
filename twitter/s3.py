@@ -6,13 +6,18 @@ s3 = boto3.client('s3')
 def uploader(content):
     screen_name = str(content["user"]["screen_name"])
     screen_name = screen_name.replace(' ','')
-    s3.put_object(Body=(bytes(json.dumps(content).encode('UTF-8'))),
-    Bucket='ogb-dados-gerais',
-    Key=f'{screen_name}/{screen_name}_{content["id_str"]}.json')
+    try:
+        s3.put_object(Body=(bytes(json.dumps(content).encode('UTF-8'))),
+        Bucket='ogb-dados-gerais',
+        Key=f'landing_zone/{screen_name}/{screen_name}_{content["id_str"]}.json')
+    except botocore.exceptions.NoCredentialsError as e:
+        print(e)
+        time.sleep(1)
+        uploader(content)
 
 def downloader(key, prefix=None):
     '''
-    Downloads all files inside a bucket. Prefix can be sent opitionaly
+    Downloads all files inside a bucket. Prefix can be sent optionally
     '''
     all_objects = s3.list_objects_v2(Bucket = 'ogb-dados-gerais', Prefix=prefix, MaxKeys=1000)
     keys = [i.get('Key') for i in all_objects.get('Contents')]
