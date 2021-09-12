@@ -4,6 +4,9 @@ import json
 s3 = boto3.client('s3')
 
 def uploader(content):
+    '''
+    Uploads json to AWS S3
+    '''
     screen_name = str(content["user"]["screen_name"])
     screen_name = screen_name.replace(' ','')
     try:
