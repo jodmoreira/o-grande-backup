@@ -1,4 +1,10 @@
 import sqlite3
+import psycopg2
+import os
+
+
+
+# conn = psycopg2.connect("dbname=suppliers user=postgres password=postgres")
 
 
 path = 'storage.db'
@@ -68,4 +74,6 @@ def log_new_tweet(data):
     return 'Done!'
 
 if __name__ == '__main__':
-    create_tb_tweets_log()
+    print(os.environ.get('OGBCONNSTRING'))
+
+    # create_tb_tweets_log()

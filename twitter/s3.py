@@ -1,5 +1,6 @@
 import boto3
 import json
+from datetime import date, datetime
 
 s3 = boto3.client('s3')
 
@@ -7,12 +8,14 @@ def uploader(content):
     '''
     Uploads json to AWS S3
     '''
+    today = date.today().strftime('%d-%m-%Y')
+    now = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     screen_name = str(content["user"]["screen_name"])
     screen_name = screen_name.replace(' ','')
     try:
         s3.put_object(Body=(bytes(json.dumps(content).encode('UTF-8'))),
         Bucket='ogb-dados-gerais',
-        Key=f'landing_zone/{screen_name}/{screen_name}_{content["id_str"]}.json')
+        Key=f'landing_zone/ingestion_date={today}/{screen_name}/{screen_name}__{content["id_str"]}__{now}.json')
     except botocore.exceptions.NoCredentialsError as e:
         print(e)
         time.sleep(1)
