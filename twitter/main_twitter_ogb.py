@@ -1,4 +1,3 @@
-# YouTube Video: https://www.youtube.com/watch?v=rhBZqEWsZU4
 import tweepy
 from tweepy import API
 from tweepy import OAuthHandler

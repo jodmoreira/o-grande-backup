@@ -2,14 +2,13 @@ import sqlite3
 import psycopg2
 import os
 
-
-
-# conn = psycopg2.connect("dbname=suppliers user=postgres password=postgres")
-
-
 path = 'storage.db'
 conn = sqlite3.connect(path)
 c = conn.cursor()
+
+
+def path_postgresql():
+    path = 'admin@192.168.1.1'
 
 
 def create_tb_profiles():
