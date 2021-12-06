@@ -2,13 +2,13 @@ import sqlite3
 import psycopg2
 import os
 
-path = 'storage.db'
+path = "storage.db"
 conn = sqlite3.connect(path)
 c = conn.cursor()
 
 
-def path_postgresql():
-    path = 'admin@192.168.1.1'
+# def path_postgresql():
+#     path = 'admin@192.168.1.1'
 
 
 def create_tb_profiles():
@@ -20,21 +20,23 @@ def create_tb_profiles():
                 user_id TEXT
                 )
             """
-                )
+        )
     except:
-        return 'error'
+        return "error"
+
 
 def add_new_profile(data):
     screen_name = (data[0],)
     query = "SELECT * FROM profiles WHERE screen_name = ?"
-    c.execute(query,screen_name)
+    c.execute(query, screen_name)
     if c.fetchone() == None:
         query = """INSERT INTO profiles (screen_name, user_id) VALUES (?,?)"""
         c.execute(query, data)
         conn.commit()
-        return 'Done!'
+        return "Done!"
     else:
-        return 'Not updating. User already in database'
+        return "Not updating. User already in database"
+
 
 def read_profiles():
     c.execute(
@@ -42,6 +44,7 @@ def read_profiles():
     )
     rows = c.fetchall()
     return rows
+
 
 def create_tb_tweets_log():
     try:
@@ -56,9 +59,10 @@ def create_tb_tweets_log():
                 screen_name TEXT
                 )
             """
-                    )
+        )
     except:
-        return 'error'
+        return "error"
+
 
 def log_new_tweet(data):
     query = """INSERT INTO tweets_log (
@@ -70,9 +74,10 @@ def log_new_tweet(data):
     screen_name) VALUES (?,?,?,?,?,?)"""
     c.execute(query, data)
     conn.commit()
-    return 'Done!'
+    return "Done!"
 
-if __name__ == '__main__':
-    print(os.environ.get('OGBCONNSTRING'))
+
+if __name__ == "__main__":
+    print(os.environ.get("OGBCONNSTRING"))
 
     # create_tb_tweets_log()
