@@ -17,7 +17,7 @@ def authorization_info():
     return response.text
 
 
-def list_sites():
+def get_all_sites():
     url = f"{MAIN_URL}/sites"
     headers = {"Authorization": f"Bearer {API_KEY}", "accept-version": "1.0.0"}
     time.sleep(1)
@@ -36,7 +36,7 @@ def get_specific_site(site_id):
     return response.text
 
 
-def list_collections(site_id):
+def get_all_collections(site_id):
     url = f"{MAIN_URL}/sites/{site_id}/collections"
     headers = {"Authorization": f"Bearer {API_KEY}", "accept-version": "1.0.0"}
     time.sleep(1)
@@ -45,7 +45,7 @@ def list_collections(site_id):
     return response.text
 
 
-def get_collections(site_id, collection_id):
+def get_collection(site_id, collection_id):
     url = f"{MAIN_URL}/sites/{site_id}/collections/{collection_id}"
     headers = {"Authorization": f"Bearer {API_KEY}", "accept-version": "1.0.0"}
     time.sleep(1)
@@ -55,7 +55,7 @@ def get_collections(site_id, collection_id):
 
 
 def get_all_items_from_collections(site_id, collection_id):
-    url = f"{MAIN_URL}/sites/{site_id}/collections/{collection_id}/items"
+    url = f"{MAIN_URL}/collections/{collection_id}/items"
     headers = {"Authorization": f"Bearer {API_KEY}", "accept-version": "1.0.0"}
     time.sleep(1)
     response = requests.request("GET", url, headers=headers)
