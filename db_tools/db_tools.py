@@ -17,7 +17,7 @@ def new_agents_table():
     cur = conn.cursor()
     cur.execute(
         """CREATE TABLE agents (
-            id SERIAL PRIMARY KEY, 
+            agent_id SERIAL PRIMARY KEY, 
             agent_name TEXT NOT NULL, 
             agent_description TEXT NOT NULL);"""
     )
@@ -29,11 +29,11 @@ def new_twitter_profiles_table():
     cur = conn.cursor()
     cur.execute(
         """CREATE TABLE twitter_profiles (
-            id SERIAL PRIMARY KEY, 
+            twitter_profile_id SERIAL PRIMARY KEY, 
             agent_twitter_id TEXT NOT NULL,
             agent_twitter_screen_name TEXT NOT NULL,
             agent_lake_dir TEXT NOT NULL, 
-            FOREIGN KEY (agent_id) REFERENCES agents(id));"""
+            FOREIGN KEY (agent_id) REFERENCES agents(agent_id));"""
     )
     conn.commit()
     cur.close()
@@ -43,11 +43,12 @@ def new_twitter_post_table():
     cur = conn.cursor()
     cur.execute(
         """CREATE TABLE twitter_posts (
-            id SERIAL PRIMARY KEY, 
+            twitter_post_id SERIAL PRIMARY KEY, 
             post_id TEXT NOT NULL, 
             post_date DATE NOT NULL, 
             post_lake_dir TEXT NOT NULL,
-            FOREIGN KEY (agent_twitter_id) REFERENCES twitter_profiles(twitter_twitter_id));"""
+            twitter_profile_id INTEGER REFERENCE twitter_profiles(twitter_profile_id),
+            agent_id INTEGER REFERENCES agents(agent_id));"""
     )
     conn.commit()
     cur.close()
@@ -71,11 +72,15 @@ def add_new_agent(agent_name, agent_description):
     
 
 def add_new_twitter_profile(
-    agent_twitter_id, agent_twitter_screen_name, agent_lake_dir
-):
+    agent_twitter_id, agent_twitter_screen_name, agent_lake_dir):
     cur = conn.cursor()
     cur.execute(
-        """INSERT INTO twitter_profiles (agent_twitter_id, agent_twitter_screen_name, agent_lake_dir)
+        """SELECT agent_name FROM agents WHERE agent_name = %s""", (agent_name,)
+    )
+    cur.execute(
+        """INSERT INTO twitter_profiles (agent_twitter_id, 
+        agent_twitter_screen_name, 
+        agent_lake_dir)
         VALUES (%s, %s, %s)""",
         (agent_twitter_id, agent_twitter_screen_name, agent_lake_dir),
     )

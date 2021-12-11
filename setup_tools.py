@@ -62,9 +62,10 @@ def add_twitter_profile_to_db():
 
 
 if __name__ == "__main__":
-    all_twitter_profiles = add_twitter_profile_to_db()
-    for agent in all_twitter_profiles:
+    # all_twitter_profiles = add_twitter_profile_to_db()
+    all_profiles = add_agents_to_db()
+    for agent in all_profiles:
         # Leaving agent_description empty for now
-        # agent_description = ""
+        agent_description = ""
         print(agent)
-        # db_tools.add_new_agent(agent, agent_description)
+        db_tools.add_new_agent(agent, agent_description)
