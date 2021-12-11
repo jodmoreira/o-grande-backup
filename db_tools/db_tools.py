@@ -55,14 +55,20 @@ def new_twitter_post_table():
 
 def add_new_agent(agent_name, agent_description):
     cur = conn.cursor()
+
     cur.execute(
+        """SELECT agent_name FROM agents WHERE agent_name = %s""", (agent_name,)
+    )
+    result = cur.fetchone()
+    if result is None:
+        cur.execute(
         """INSERT INTO agents (agent_name, agent_description)
         VALUES (%s, %s)""",
         (agent_name, agent_description),
     )
     conn.commit()
     cur.close()
-
+    
 
 def add_new_twitter_profile(
     agent_twitter_id, agent_twitter_screen_name, agent_lake_dir

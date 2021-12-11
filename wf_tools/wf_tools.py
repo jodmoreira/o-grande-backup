@@ -54,8 +54,8 @@ def get_collection(site_id, collection_id):
     return response.text
 
 
-def get_all_items_from_collections(site_id, collection_id):
-    url = f"{MAIN_URL}/collections/{collection_id}/items"
+def get_all_items_from_collections(site_id, collection_id, offset=0):
+    url = f"{MAIN_URL}/collections/{collection_id}/items?offset={offset}"
     headers = {"Authorization": f"Bearer {API_KEY}", "accept-version": "1.0.0"}
     time.sleep(1)
     response = requests.request("GET", url, headers=headers)
