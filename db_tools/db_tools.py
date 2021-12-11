@@ -28,12 +28,12 @@ def new_agents_table():
 def new_twitter_profiles_table():
     cur = conn.cursor()
     cur.execute(
-        """CREATE TABLE twitter_profiles (
-            twitter_profile_id SERIAL PRIMARY KEY, 
-            agent_twitter_id TEXT NOT NULL,
-            agent_twitter_screen_name TEXT NOT NULL,
-            agent_lake_dir TEXT NOT NULL, 
-            FOREIGN KEY (agent_id) REFERENCES agents(agent_id));"""
+        """	CREATE TABLE twitter_profiles (
+	            twitter_profile_id SERIAL PRIMARY KEY, 
+	            agent_platform_id TEXT NOT NULL,
+	            agent_screen_name TEXT NOT NULL,
+	            agent_lake_dir TEXT NOT NULL, 
+	            agent_id INTEGER REFERENCES agents(agent_id));"""
     )
     conn.commit()
     cur.close()
@@ -47,7 +47,7 @@ def new_twitter_post_table():
             post_id TEXT NOT NULL, 
             post_date DATE NOT NULL, 
             post_lake_dir TEXT NOT NULL,
-            twitter_profile_id INTEGER REFERENCE twitter_profiles(twitter_profile_id),
+            twitter_profile_id INTEGER REFERENCES twitter_profiles(twitter_profile_id),
             agent_id INTEGER REFERENCES agents(agent_id));"""
     )
     conn.commit()
@@ -75,10 +75,10 @@ def add_new_twitter_profile(
     agent_twitter_id, agent_twitter_screen_name, agent_lake_dir):
     cur = conn.cursor()
     cur.execute(
-        """SELECT agent_name FROM agents WHERE agent_name = %s""", (agent_name,)
+        """SELECT agent_twitter_screen_name FROM agents WHERE twitter_profiles = %s""", (agent_twitter_screen_name,)
     )
     cur.execute(
-        """INSERT INTO twitter_profiles (agent_twitter_id, 
+        """INSERT INTO twitter_profiles ( 
         agent_twitter_screen_name, 
         agent_lake_dir)
         VALUES (%s, %s, %s)""",
