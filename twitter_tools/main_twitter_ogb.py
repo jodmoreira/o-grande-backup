@@ -1,7 +1,6 @@
 import tweepy
 from tweepy import API
 from tweepy import OAuthHandler
-import twitter_credentials
 import time
 import json
 import s3

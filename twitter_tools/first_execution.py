@@ -2,7 +2,9 @@ import main_twitter_ogb
 import database
 import os
 
-with open('base.txt', 'r+') as arq:
+
+# Legacy script. It will be updated
+with open("base.txt", "r+") as arq:
     base = arq.readlines()
     print(base)
     for screen_name in base:
@@ -13,12 +15,12 @@ with open('base.txt', 'r+') as arq:
             new_profile = database.add_new_profile(data)
             profiles = database.read_profiles()
         except:
-            print('erro 1')
-        if new_profile == 'Done!':
+            print("erro 1")
+        if new_profile == "Done!":
             try:
                 main_twitter_ogb.primeira_execucao(screen_name)
             except:
-                print('erro 2')
+                print("erro 2")
                 pass
         # print(profiles)
         print(new_profile)
