@@ -43,7 +43,7 @@ def new_twitter_post_table():
     cur.execute(
         """CREATE TABLE twitter_posts (
             twitter_post_id SERIAL PRIMARY KEY, 
-            post_id TEXT NOT NULL, 
+            post_platform_id TEXT NOT NULL, 
             post_date DATE NOT NULL, 
             post_lake_dir TEXT NOT NULL,
             twitter_profile_id INTEGER REFERENCES twitter_profiles(twitter_profile_id),

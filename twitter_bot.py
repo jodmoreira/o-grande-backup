@@ -28,6 +28,12 @@ class OgbListener(tweepy.StreamListener):
                 f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
             )
             s3.uploader(content)
+            post_platform_id = content["id_str"]
+            post_date = content["created_at"]
+            post_lake_dir 
+            agent_platform_id = content["user"]["id_str"]
+            agent_id
+
             database_payload = (
                 content["user"]["screen_name"],
                 content["user"]["id_str"],
@@ -36,7 +42,7 @@ class OgbListener(tweepy.StreamListener):
                 str(datetime.now()),
                 int(time.time()),
             )
-            database.log_new_tweet(database_payload)
+            db_tools.add_new_twitter_post(database_payload)
 
     def on_error(self, status_code):
         if status_code == 420:
