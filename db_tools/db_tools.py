@@ -62,22 +62,22 @@ def add_new_agent(agent_name, agent_description):
     result = cur.fetchone()
     if result is None:
         cur.execute(
-        """INSERT INTO agents (agent_name, agent_description)
+            """INSERT INTO agents (agent_name, agent_description)
         VALUES (%s, %s)""",
-        (agent_name, agent_description),
-    )
+            (agent_name, agent_description),
+        )
     conn.commit()
     cur.close()
-    
 
-def add_new_twitter_profile(
-   agent_name, agent_twitter_screen_name, agent_platform_id):
+
+def add_new_twitter_profile(agent_name, agent_twitter_screen_name, agent_platform_id):
     cur = conn.cursor()
     cur.execute(
         """SELECT 
         agent_platform_id
         FROM twitter_profiles 
-        WHERE agent_platform_id = %s""", (agent_platform_id,)
+        WHERE agent_platform_id = %s""",
+        (agent_platform_id,),
     )
     result = cur.fetchone()
     if result == None:
@@ -92,12 +92,34 @@ def add_new_twitter_profile(
     conn.commit()
     cur.close()
 
-def add_new_twitter_post(post_id, post_date, post_lake_dir):
+
+def add_new_twitter_post(
+    post_platform_id, post_date, post_lake_dir, agent_platform_id, agent_id
+):
     cur = conn.cursor()
     cur.execute(
-        """INSERT INTO twitter_posts (post_id, post_date, post_lake_dir)
+        """twitter_posts (
+        post_platform_id,
+        post_date,
+        post_lake_dir,
+        agent_platform_id,
+        agent_id
+        )
         VALUES (%s, %s, %s)""",
-        (post_id, post_date, post_lake_dir),
+        (post_platform_id, post_date, post_lake_dir, agent_platform_id, agent_id),
     )
     conn.commit()
     cur.close()
+
+
+# def log_new_tweet(data):
+#     query = """INSERT INTO tweets_log (
+#     timestamp,
+#     datetime,
+#     tweet_creation_datetime,
+#     tweet_id,
+#     user_id,
+#     screen_name) VALUES (?,?,?,?,?,?)"""
+#     c.execute(query, data)
+#     conn.commit()
+#     return "Done!"

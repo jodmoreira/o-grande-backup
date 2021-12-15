@@ -1,11 +1,15 @@
-import twitter_credentials
 import tweepy
-import json
+import os
 import s3
 import database
 from datetime import datetime, timedelta
 import time
 from urllib3.exceptions import ProtocolError
+
+CONSUMER_KEY = os.environ.get("TWITTER_CONSUMER_KEY")
+CONSUMER_SECRET = os.environ.get("TWITTER_CONSUMER_SECRET")
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
+ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
 
 
 class OgbListener(tweepy.StreamListener):
@@ -48,12 +52,8 @@ def orchestrator(ogb_stream, users_to_follow):
 
 
 def main(ogb_stream, users_to_follow):
-    auth = tweepy.OAuthHandler(
-        twitter_credentials.CONSUMER_KEY, twitter_credentials.CONSUMER_SECRET
-    )
-    auth.set_access_token(
-        twitter_credentials.ACCESS_TOKEN, twitter_credentials.ACCESS_TOKEN_SECRET
-    )
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
     obj_listener = OgbListener()
     ogb_stream = tweepy.Stream(auth=api.auth, listener=obj_listener)
