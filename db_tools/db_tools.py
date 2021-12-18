@@ -45,6 +45,7 @@ def new_twitter_post_table():
             twitter_post_id SERIAL PRIMARY KEY, 
             post_platform_id TEXT NOT NULL, 
             post_date DATE NOT NULL, 
+            ingestion_date DATE,
             post_lake_dir TEXT NOT NULL,
             twitter_profile_id INTEGER REFERENCES twitter_profiles(twitter_profile_id),
             agent_id INTEGER REFERENCES agents(agent_id));"""
@@ -94,32 +95,41 @@ def add_new_twitter_profile(agent_name, agent_twitter_screen_name, agent_platfor
 
 
 def add_new_twitter_post(
-    post_platform_id, post_date, post_lake_dir, agent_platform_id, agent_id
+    post_platform_id,
+    post_date,
+    ingestion_datetime,
+    post_lake_dir,
+    agent_platform_id,
+    agent_id,
 ):
     cur = conn.cursor()
     cur.execute(
         """twitter_posts (
         post_platform_id,
         post_date,
+        ingestion_date,
         post_lake_dir,
         agent_platform_id,
         agent_id
         )
         VALUES (%s, %s, %s)""",
-        (post_platform_id, post_date, post_lake_dir, agent_platform_id, agent_id),
+        (
+            post_platform_id,
+            post_date,
+            ingestion_datetime,
+            post_lake_dir,
+            agent_platform_id,
+            agent_id,
+        ),
     )
     conn.commit()
     cur.close()
 
 
-# def log_new_tweet(data):
-#     query = """INSERT INTO tweets_log (
-#     timestamp,
-#     datetime,
-#     tweet_creation_datetime,
-#     tweet_id,
-#     user_id,
-#     screen_name) VALUES (?,?,?,?,?,?)"""
-#     c.execute(query, data)
-#     conn.commit()
-#     return "Done!"
+def select_twitter_profiles():
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT * FROM twitter_profiles""",
+    )
+    rows = cur.fetchall()
+    return rows

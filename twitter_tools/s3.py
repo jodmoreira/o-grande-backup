@@ -1,6 +1,7 @@
 import boto3
 import json
 from datetime import date, datetime
+import time
 
 s3 = boto3.client('s3')
 
@@ -12,7 +13,6 @@ def uploader(content):
     year = today.year
     month = today.month
     day = today.day
-    today_str = today.strftime('%d-%m-%Y')
     now = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     screen_name = str(content["user"]["screen_name"])
     screen_name = screen_name.replace(' ','')
