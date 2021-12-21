@@ -1,5 +1,5 @@
 import aws_tools.s3_tools as s3_tools
-import db_tools.db_tools as db_tools
+import db_tools.postgres_tools as postgres_tools
 import wf_tools.wf_tools as wf_tools
 import json
 
@@ -77,24 +77,3 @@ def add_twitter_profile_to_db():
                 pass
         twitter_output += twitter_names
     return twitter_output
-
-
-if __name__ == "__main__":
-    all_twitter_profiles = add_twitter_profile_to_db()
-    # all_profiles = add_agents_to_db()
-    arq_entrada = open("backup.csv", "r")
-    arq_entrada = arq_entrada.readlines()
-    for agent_backup in arq_entrada:
-        agent_backup = agent_backup.replace("\n", "")
-        agent_backup = agent_backup.split(",")
-        for agent in all_twitter_profiles:
-            if agent["twitter"].lower() == agent_backup[0].lower():
-                output = {
-                    "name": agent["name"],
-                    "screen_name": agent["twitter"],
-                    "twitter_id": agent_backup[1],
-                }
-                print(output)
-                db_tools.add_new_twitter_profile(
-                    agent["name"], agent["twitter"], agent_backup[1]
-                )

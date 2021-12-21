@@ -99,31 +99,38 @@ def add_new_twitter_post(
     post_date,
     ingestion_datetime,
     post_lake_dir,
-    agent_platform_id,
-    agent_id,
+    twitter_profile_id,
 ):
     cur = conn.cursor()
-    cur.execute(
-        """twitter_posts (
+    sql_query = f"""INSERT INTO twitter_posts (
         post_platform_id,
         post_date,
-        ingestion_date,
+        ingestion_datetime,
         post_lake_dir,
-        agent_platform_id,
-        agent_id
-        )
-        VALUES (%s, %s, %s)""",
-        (
-            post_platform_id,
-            post_date,
-            ingestion_datetime,
-            post_lake_dir,
-            agent_platform_id,
-            agent_id,
-        ),
+        twitter_profile_id,
+        agent_id)
+        VALUES ('{post_platform_id}', 
+        '{post_date}', 
+        '{ingestion_datetime}', 
+        '{post_lake_dir}', 
+        {twitter_profile_id}, 
+        (SELECT agent_id FROM twitter_profiles WHERE twitter_profile_id = '{twitter_profile_id}'))
+        """
+    cur.execute(
+        sql_query,
     )
     conn.commit()
     cur.close()
+
+
+def free_style_select(sql_query):
+    cur = conn.cursor()
+    cur.execute(
+        sql_query,
+    )
+    rows = cur.fetchone()
+    cur.close()
+    return rows
 
 
 def select_twitter_profiles():
@@ -132,4 +139,5 @@ def select_twitter_profiles():
         """SELECT * FROM twitter_profiles""",
     )
     rows = cur.fetchall()
+    cur.close()
     return rows

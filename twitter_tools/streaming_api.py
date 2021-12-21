@@ -15,24 +15,24 @@ ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
 class OgbListener(tweepy.StreamListener):
     def on_status(self, status):
         content = status._json
-        if (
-            content["text"].startswith("RT @") == False
-            and content["in_reply_to_user_id"] == None
-        ):
-            # Just to adjust to my current timezone
-            print(
-                f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
-            )
-            s3.uploader(content)
-            database_payload = (
-                content["user"]["screen_name"],
-                content["user"]["id_str"],
-                content["id_str"],
-                content["created_at"],
-                str(datetime.now()),
-                int(time.time()),
-            )
-            database.log_new_tweet(database_payload)
+        # if (
+        #     content["text"].startswith("RT @") == False
+        #     and content["in_reply_to_user_id"] == None
+        # ):
+        # Just to adjust to my current timezone
+        print(
+            f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
+        )
+        # s3.uploader(content)
+        # database_payload = (
+        #     content["user"]["screen_name"],
+        #     content["user"]["id_str"],
+        #     content["id_str"],
+        #     content["created_at"],
+        #     str(datetime.now()),
+        #     int(time.time()),
+        # )
+        # database.log_new_tweet(database_payload)
 
     def on_error(self, status_code):
         if status_code == 420:
@@ -42,6 +42,10 @@ class OgbListener(tweepy.StreamListener):
 
 
 def orchestrator(ogb_stream, users_to_follow):
+    """
+    ogb_stream:
+    users_to_follow:
+    """
     try:
         ogb_stream.filter(follow=set(users_to_follow))
     except (ProtocolError, AttributeError) as e:

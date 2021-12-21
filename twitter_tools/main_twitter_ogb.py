@@ -40,6 +40,8 @@ def first_execution(new_user):
     Runs the frist API loop and returns the first 200 tweets and
     then starts looping
     """
+    auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    api = API(auth)
     try:
         tweets = api.user_timeline(id=new_user, tweet_mode="extended", count=200)
         for tweet in tweets:
@@ -54,6 +56,8 @@ def first_execution(new_user):
 
 
 def get_user_id(screen_name):
+    auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    api = API(auth)
     id = api.get_user(screen_name).id
     return id
 

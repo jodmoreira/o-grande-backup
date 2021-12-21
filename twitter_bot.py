@@ -1,5 +1,5 @@
 import twitter_tools
-import db_tools.db_tools as db_tools
+import db_tools.postgres_tools as postgres_tools
 import aws_tools.s3_tools as s3
 import tweepy
 import os
@@ -10,17 +10,19 @@ from urllib3.exceptions import ProtocolError
 
 CONSUMER_KEY = os.environ.get("TWITTER_CONSUMER_KEY")
 CONSUMER_SECRET = os.environ.get("TWITTER_CONSUMER_SECRET")
-ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
-ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
+ACCESS_TOKEN = os.environ.get("TWITTER_ACCESS_TOKEN")
+ACCESS_TOKEN_SECRET = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
+# Used to fill db entry for non agents data
+NON_AGENT = os.environ.get("NON_AGENT")
+NON_AGENT_ID = os.environ.get("NON_AGENT_ID")
 
 
-class OgbListener(tweepy.StreamListener):
+class OgbListener(tweepy.Stream):
     def on_status(self, status):
         content = status._json
         now = datetime.now()
         bsb_tz = pytz.timezone("America/Sao_Paulo")
         ingestion_datetime = bsb_tz.localize(now).strftime("%Y-%m-%d %H:%M:%S%z")
-        print("Non-captured tweet")
         if (
             content["text"].startswith("RT @") == False
             and content["in_reply_to_user_id"] == None
@@ -28,21 +30,38 @@ class OgbListener(tweepy.StreamListener):
             print(
                 f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
             )
-            s3.uploader(content)
+
             screen_name = content["user"]["screen_name"]
-            post_platform_id = content["id_str"]
-            post_date = content["created_at"]
-            post_lake_dir = f"social_media/twitter/landing_zone/year={now.year}/month={now.month}/day={now.day}/{screen_name}/{content['id_str']}__{now}.json"
-            agent_platform_id = content["user"]["id_str"]
-            agent_id = content["user"]["id_str"]
-            db_tools.add_new_twitter_post(
-                post_platform_id,
-                post_date,
-                ingestion_datetime,
-                post_lake_dir,
-                agent_platform_id,
-                agent_id,
+            twitter_profile_id = postgres_tools.free_style_select(
+                f"""SELECT twitter_profile_id 
+                FROM twitter_profiles 
+                WHERE agent_screen_name = '{screen_name}'"""
             )
+            post_lake_dir = f"social_media/twitter/landing_zone/year={now.year}/month={now.month}/day={now.day}/{screen_name}/{content['id_str']}__{now}.json"
+
+        else:
+            screen_name = NON_AGENT
+            twitter_profile_id = NON_AGENT_ID
+            post_lake_dir = f"social_media/twitter/landing_zone/year={now.year}/month={now.month}/day={now.day}/{screen_name}/{content['id_str']}__{now}.json"
+            print(
+                f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
+            )
+        bucket_name = "ogb-lake"
+        s3.upload_file(bucket_name, content, post_lake_dir)
+        post_platform_id = content["id_str"]
+        post_date = datetime.strftime(
+            datetime.strptime(content["created_at"], "%a %b %d %H:%M:%S %z %Y"),
+            "%Y-%m-%d %H:%M:%S",
+        )
+        print(twitter_profile_id)
+        twitter_profile_id = twitter_profile_id[0]
+        postgres_tools.add_new_twitter_post(
+            post_platform_id,
+            post_date,
+            ingestion_datetime,
+            post_lake_dir,
+            twitter_profile_id,
+        )
 
     def on_error(self, status_code):
         if status_code == 420:
@@ -51,24 +70,22 @@ class OgbListener(tweepy.StreamListener):
             return True
 
 
-def orchestrator(ogb_stream, users_to_follow):
-    # try:
-    print("listening")
-    ogb_stream.filter(follow=set(users_to_follow))
-    # except (ProtocolError, AttributeError) as e:
-    #     print(e)
-    #     print("Sleep")
-    #     time.sleep(5)
-    #     orchestrator(ogb_stream, users_to_follow)
+def orchestrator(stream, users_to_follow):
+    try:
+        stream.filter(follow=users_to_follow, threaded=True)
+    except (ProtocolError, AttributeError) as e:
+        print(e)
+        print("Sleep")
+        time.sleep(5)
+        orchestrator(stream, users_to_follow)
 
 
 if __name__ == "__main__":
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
-    obj_listener = OgbListener()
-    ogb_stream = tweepy.Stream(auth=api.auth, listener=obj_listener)
-    profiles = db_tools.select_twitter_profiles()
+    stream = OgbListener(
+        CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+    )
+    profiles = postgres_tools.select_twitter_profiles()
+    # Get all the twitter profiles from db and remove the non agent entry
     users_to_follow = [i[1] for i in profiles]
-    print(users_to_follow)
-    orchestrator(ogb_stream, users_to_follow)
+    users_to_follow.remove(NON_AGENT)
+    orchestrator(stream, users_to_follow)
