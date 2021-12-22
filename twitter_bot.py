@@ -1,5 +1,6 @@
 import twitter_tools
 import db_tools.postgres_tools as postgres_tools
+import telegram_tools.telegram_tools as telegram_tools
 import aws_tools.s3_tools as s3
 import tweepy
 import os
@@ -75,6 +76,12 @@ def orchestrator(stream, users_to_follow):
         stream.filter(follow=users_to_follow, threaded=True)
     except (ProtocolError, AttributeError) as e:
         print(e)
+        telegram_tools.send_message(f"OGB Twitter Stream Error, {e}")
+        print("Sleep")
+        time.sleep(5)
+        orchestrator(stream, users_to_follow)
+    except:
+        telegram_tools.send_message("OGB Twitter Stream Generic Error")
         print("Sleep")
         time.sleep(5)
         orchestrator(stream, users_to_follow)
