@@ -12,3 +12,4 @@ __pycache__/
 .pytest_env/
 .pytest_env_cache/
 .pytest_cache/
+twitter_tools/temp_storage/*

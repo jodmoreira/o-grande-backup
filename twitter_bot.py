@@ -1,4 +1,4 @@
-import twitter_tools
+import twitter_tools.main_twitter_ogb as twitter_tools
 import db_tools.postgres_tools as postgres_tools
 import telegram_tools.telegram_tools as telegram_tools
 import aws_tools.s3_tools as s3
@@ -24,6 +24,7 @@ class OgbListener(tweepy.Stream):
         now = datetime.now()
         bsb_tz = pytz.timezone("America/Sao_Paulo")
         ingestion_datetime = bsb_tz.localize(now).strftime("%Y-%m-%d %H:%M:%S%z")
+        post_platform_id = content["id_str"]
         if (
             content["text"].startswith("RT @") == False
             and content["in_reply_to_user_id"] == None
@@ -38,23 +39,25 @@ class OgbListener(tweepy.Stream):
                 FROM twitter_profiles 
                 WHERE agent_screen_name = '{screen_name}'"""
             )
-            post_lake_dir = f"social_media/twitter/landing_zone/year={now.year}/month={now.month}/day={now.day}/{screen_name}/{content['id_str']}__{now}.json"
+            post_lake_dir = f"social_media/twitter/landing_zone/year={now.year}/month={now.month}/day={now.day}/{screen_name}/{post_platform_id}__{now}.json"
 
         else:
             screen_name = NON_AGENT
             twitter_profile_id = NON_AGENT_ID
-            post_lake_dir = f"social_media/twitter/landing_zone/year={now.year}/month={now.month}/day={now.day}/{screen_name}/{content['id_str']}__{now}.json"
+            post_lake_dir = f"social_media/twitter/landing_zone/year={now.year}/month={now.month}/day={now.day}/{screen_name}/{post_platform_id}__{now}.json"
             print(
                 f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
             )
         bucket_name = "ogb-lake"
         s3.upload_file(bucket_name, content, post_lake_dir)
-        post_platform_id = content["id_str"]
+        twitter_tools.save_file_to_local_directory(
+            content,
+            f"twitter_tools/temp_storage/json_data/{screen_name}-{post_platform_id}__{now}.json",
+        )
         post_date = datetime.strftime(
             datetime.strptime(content["created_at"], "%a %b %d %H:%M:%S %z %Y"),
             "%Y-%m-%d %H:%M:%S",
         )
-        print(twitter_profile_id)
         twitter_profile_id = twitter_profile_id[0]
         postgres_tools.add_new_twitter_post(
             post_platform_id,

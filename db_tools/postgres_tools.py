@@ -141,3 +141,24 @@ def select_twitter_profiles():
     rows = cur.fetchall()
     cur.close()
     return rows
+
+
+def get_all_twitter_users_id():
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT agent_platform_id FROM twitter_profiles""",
+    )
+    rows = cur.fetchall()
+    cur.close()
+    return rows
+
+
+def get_tweets_by_user_id(agent_id):
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT post_platform_id FROM twitter_posts WHERE agent_id = %s""",
+        (agent_id,),
+    )
+    rows = cur.fetchall()
+    cur.close()
+    return rows
