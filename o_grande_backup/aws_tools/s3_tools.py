@@ -24,7 +24,7 @@ def upload_compressed_file_from_local_directory(
         local_directory,
         bucket_name,
         post_lake_dir,
-        ExtraArgs={"ContentType": "application/json", "ContentEncoding": "gzip"},
+        ExtraArgs={"ContentType": "application/json"},
     )
     try:
         waiter = s3.get_waiter("object_exists")

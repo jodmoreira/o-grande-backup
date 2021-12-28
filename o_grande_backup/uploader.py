@@ -2,6 +2,7 @@ import aws_tools.s3_tools as s3_tools
 import os
 from datetime import datetime
 import pytz
+import telegram_tools.telegram_tools as telegram_tools
 
 ## List all files in the twitter directory
 def twitter_files():
@@ -13,16 +14,15 @@ def twitter_files():
     files = os.listdir(twitter_files_path)
 
     for file in files:
-        post_lake_dir = f"social_media/twitter/landing_zone/year={now.year}/month={now.month}/day={now.day}/{file}"
-        print(post_lake_dir)
+        post_lake_dir = f"social_media/twitter/testing_zone/year={now.year}/month={now.month}/day={now.day}/{file}"
         content = f"{twitter_files_path}/{file}"
         request = s3_tools.upload_compressed_file_from_local_directory(
             "ogb-lake", content, post_lake_dir
         )
-        print(request)
         if request == 200:
             print(f"{file} uploaded successfully")
             print(f"removing {file} from local directory")
+            telegram_tools.send_message(f"{file} uploaded successfully")
             os.remove(f"{twitter_files_path}/{file}")
 
 

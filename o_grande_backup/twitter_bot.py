@@ -52,7 +52,7 @@ class OgbListener(tweepy.Stream):
                 f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
             )
         bucket_name = "ogb-lake"
-        s3.upload_file(bucket_name, content, post_lake_dir)
+        # s3.upload_file(bucket_name, content, post_lake_dir)
         twitter_tools.save_file_to_local_directory(
             content,
             f"{SCRIPT_PATH}/twitter_tools/temp_storage/json_data/{screen_name}-{post_platform_id}__{now}.json",
