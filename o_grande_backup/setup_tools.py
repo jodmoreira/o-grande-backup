@@ -1,3 +1,4 @@
+## Script to run things needed to setup the system
 import aws_tools.s3_tools as s3_tools
 import db_tools.postgres_tools as postgres_tools
 import wf_tools.wf_tools as wf_tools
