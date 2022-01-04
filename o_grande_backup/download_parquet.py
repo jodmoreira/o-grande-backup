@@ -19,7 +19,7 @@ def download_twitter_today_files():
     script_dir = os.path.dirname(os.path.realpath(__file__))
     list_s3_files = s3_tools.list_files(
         "ogb-lake",
-        f"social_media/twitter/structured_zone/agent/year=2022/month=01/day=01/",
+        f"social_media/twitter/structured_zone/agent/year={year}/month={month}/day={day}/",
     )
     for file_name in list_s3_files:
         output_file = file_name.split("/")[-1]
