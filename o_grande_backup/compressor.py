@@ -20,6 +20,7 @@ class Compressor_tools:
         self.json_files_path = f"{self.script_path}/{json_files_path}"
         self.json_multiline_path = f"{self.script_path}/twitter_tools/temp_storage/compressed_files/tweets-{self.ingestion_datetime}.json"
         self.json_files = os.listdir(self.json_files_path)
+        self.files_count = len(self.json_files)
 
     def create_json_file(self):
         with open(self.json_multiline_path, "a+") as new_json_file:
@@ -61,7 +62,9 @@ def routine():
     print(f"Adding files to a json multiline named {json_multiline_path_name}")
     compressor.create_json_file()
     compressor.delete_intersection_files()
-    telegram_tools.send_message(f"Compressed files created: {json_multiline_path_name}")
+    telegram_tools.send_message(
+        f"Compressed files created: {json_multiline_path_name} from {compressor.files_count} files"
+    )
 
 
 if __name__ == "__main__":

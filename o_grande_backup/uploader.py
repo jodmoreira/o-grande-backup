@@ -23,13 +23,16 @@ def twitter_files():
     for file in files:
         post_lake_dir = f"social_media/twitter/landing_zone/year={year}/month={month}/day={day}/{file}"
         content = f"{twitter_files_path}/{file}"
+        file_size = os.path.getsize(content)
         request = s3_tools.upload_compressed_file_from_local_directory(
             "ogb-lake", content, post_lake_dir
         )
         if request == 200:
             print(f"{file} uploaded successfully")
             print(f"removing {file} from local directory")
-            telegram_tools.send_message(f"{file} uploaded successfully")
+            telegram_tools.send_message(
+                f"The {file_size} bytes file uploaded successfully at {datetime.now()}"
+            )
             os.remove(f"{twitter_files_path}/{file}")
 
 
