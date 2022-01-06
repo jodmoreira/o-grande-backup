@@ -24,7 +24,7 @@ def download_twitter_today_files():
     # Lists all S3 files in the directory of the current day
     list_s3_files = s3_tools.list_files(
         "ogb-lake",
-        f"social_media/twitter/structured_zone/agent/year=2022/month=01/day=01/",
+        f"social_media/twitter/structured_zone/agent/year={year}/month={month}/day={day}/",
     )
     # Iterate through the list of file paths and download them
     for file_name in list_s3_files:
