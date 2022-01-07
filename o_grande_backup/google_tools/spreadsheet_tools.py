@@ -4,6 +4,7 @@ import pandas as pd
 from gspread.exceptions import APIError
 import time
 import os
+import requests
 
 CREDENTIALS = os.environ.get("CREDENTIALS")
 
@@ -31,6 +32,9 @@ def writer(value, spreadsheet, worksheet="Sheet1"):
     except APIError as e:
         print(e)
         time.sleep(60)
+        writer(value, spreadsheet, worksheet)
+    except requests.exceptions.ConnectionError:
+        time.sleep(180)
         writer(value, spreadsheet, worksheet)
 
 
