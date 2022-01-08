@@ -107,11 +107,15 @@ def orchestrator(stream, users_to_follow):
 
 
 if __name__ == "__main__":
-    stream = OgbListener(
-        CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
-    )
-    profiles = postgres_tools.select_twitter_profiles()
-    # Get all the twitter profiles from db and remove the non agent entry
-    users_to_follow = [i[1] for i in profiles]
-    users_to_follow.remove(NON_AGENT)
-    orchestrator(stream, users_to_follow)
+    try:
+        stream = OgbListener(
+            CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+        )
+        profiles = postgres_tools.select_twitter_profiles()
+        # Get all the twitter profiles from db and remove the non agent entry
+        users_to_follow = [i[1] for i in profiles]
+        users_to_follow.remove(NON_AGENT)
+        orchestrator(stream, users_to_follow)
+    except Exception as e:
+        print(e)
+        telegram_tools.send_message(f"OGB Twitter Stream Error, {e}")
