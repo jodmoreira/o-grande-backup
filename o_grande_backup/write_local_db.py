@@ -6,7 +6,7 @@ import sqlite3
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 # Generate the path which the parquet files are stored
 FILES_PATH = f"{SCRIPT_DIR}/twitter_tools/temp_storage/parquet_files"
-SHARING_ZONE_DIRECTORY = os.environ("SHARING_ZONE_DIRECTORY")
+SHARING_ZONE_DIRECTORY = os.environ["SHARING_ZONE_DIRECTORY"]
 
 
 def list_parquet_files():
@@ -26,6 +26,11 @@ def create_dataframe(list_files):
         df = pd.read_parquet(f"{FILES_PATH}/{file_name}")
         df_list.append(df)
     df = pd.concat(df_list)
+    try:
+        df["id.long"] = df["id"]
+        df = df.drop(columns=["id"])
+    except:
+        pass
     return df
 
 
@@ -49,11 +54,11 @@ def write_to_db(df, screen_names):
     for screen_name in screen_names:
         df_loop = df[df["user.screen_name"] == screen_name]
         folder_name = df_loop["user.screen_name"].values[0]
+        print(f"writing {screen_name} to db")
         conn = sqlite3.connect(
             f"{SHARING_ZONE_DIRECTORY}/social_media/twitter/{folder_name}/{folder_name}.db"
         )
         df_loop.to_sql("tweets", conn, if_exists="append", index=False)
-        print(f"wrote {screen_name} to db")
 
 
 def delete_files(files_list):

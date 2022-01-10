@@ -1,0 +1,42 @@
+## Watchdog system to check if something is not working as expected
+import psutil
+import time
+import telegram_tools.telegram_tools as telegram_tools
+import os
+
+EXPECTED_COMMANDS = os.environ.get("EXPECTED_COMMANDS").split(",")
+
+
+def check_if_process_is_running():
+    commands = []
+    for proc in psutil.process_iter():
+        if proc.name() == "python":
+            try:
+                command = proc.cmdline()[1]
+                commands.append(command)
+            except IndexError:
+                pass
+    return commands
+
+
+def check_if_is_same(commands):
+    is_same = set(EXPECTED_COMMANDS) == set(commands)
+    return is_same
+
+
+def check_fault_command(commands):
+    fault_command = set(EXPECTED_COMMANDS).difference(commands)
+    print(fault_command)
+    return fault_command
+
+
+while True:
+    commands = check_if_process_is_running()
+    is_subset = check_if_is_same(commands)
+    if is_subset == False:
+        fault_command = check_fault_command(commands)
+        telegram_tools.send_message(f"The process {fault_command} is not running")
+        print(f"The process {fault_command} is not running")
+    else:
+        print("Everything is running")
+    time.sleep(60)
