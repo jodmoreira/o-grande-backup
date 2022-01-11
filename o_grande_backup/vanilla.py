@@ -10,7 +10,7 @@ EXPECTED_COMMANDS = os.environ.get("EXPECTED_COMMANDS").split(",")
 def check_if_process_is_running():
     commands = []
     for proc in psutil.process_iter():
-        if proc.name() == "python":
+        if "python" in proc.name():
             try:
                 command = proc.cmdline()[1]
                 commands.append(command)
