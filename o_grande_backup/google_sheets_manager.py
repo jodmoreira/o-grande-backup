@@ -123,7 +123,7 @@ non_existent_spreadsheets = check_if_all_spreadsheets_exist(
 )
 create_non_existent_spreadsheets_on_gdrive(non_existent_spreadsheets)
 all_agents_path = get_all_local_agents_path(all_agents)
-for agente_path in all_agents_path:
+for agente_path in set(all_agents_path):
     agent_name = agente_path.split("/")[-1].split(".")[0]
     df_logs = load_log_dataframe(agent_name)
     df_agent = load_agent_dataframe(agente_path)

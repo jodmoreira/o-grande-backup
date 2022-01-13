@@ -25,8 +25,12 @@ def list_files_in_dir():
     files = drive.ListFile(
         {"q": f"'{DRIVE_TWITTER_FOLDER_ID}' in parents and trashed=false"}
     ).GetList()
-    files = [i["title"] for i in files]
-    return files
+    # file_url = [i["alternateLink"] for i in files]
+    output = []
+    for i in files:
+        files_data = {"name": i["title"], "url": i["alternateLink"]}
+        output.append(files_data)
+    return output
 
 
 def create_folder(folder_name, parent_folder_id):

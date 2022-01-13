@@ -38,6 +38,19 @@ def new_twitter_profiles_table():
     cur.close()
 
 
+def new_webflow_profiles_table():
+    cur = conn.cursor()
+    cur.execute(
+        """CREATE TABLE twitter_profiles (
+            webflow_profile_id SERIAL PRIMARY KEY, 
+            agent_name TEXT NOT NULL,
+            agent_webflow_id TEXT NOT NULL,
+            agent_id INTEGER REFERENCES agents(agent_id));"""
+    )
+    conn.commit()
+    cur.close()
+
+
 def new_twitter_post_table():
     cur = conn.cursor()
     cur.execute(
@@ -52,6 +65,23 @@ def new_twitter_post_table():
     )
     conn.commit()
     cur.close()
+
+
+# def add_new_webflow_profile():
+#     cur = conn.cursor()
+#     cur.execute(
+#         """SELECT agent_name FROM agents WHERE agent_name = %s""", (agent_name,)
+#     )
+
+#     result = cur.fetchone()
+#     if result is None:
+#         cur.execute(
+#             """INSERT INTO agents (agent_name, agent_description)
+#         VALUES (%s, %s)""",
+#             (agent_name, agent_description),
+#         )
+#     conn.commit()
+#     cur.close()
 
 
 def add_new_agent(agent_name, agent_description):
@@ -143,6 +173,16 @@ def select_twitter_profiles():
     return rows
 
 
+def get_all_agents():
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT * FROM agents""",
+    )
+    rows = cur.fetchall()
+    cur.close()
+    return rows
+
+
 def get_all_twitter_users_id():
     cur = conn.cursor()
     cur.execute(
@@ -162,3 +202,7 @@ def get_tweets_by_user_id(agent_id):
     rows = cur.fetchall()
     cur.close()
     return rows
+
+
+if __name__ == "__main__":
+    print(get_all_agents())

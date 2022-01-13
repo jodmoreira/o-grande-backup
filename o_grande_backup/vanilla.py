@@ -3,6 +3,8 @@ import psutil
 import time
 import telegram_tools.telegram_tools as telegram_tools
 import os
+import socket
+
 
 EXPECTED_COMMANDS = os.environ.get("EXPECTED_COMMANDS").split(",")
 
@@ -35,8 +37,10 @@ while True:
     is_subset = check_if_is_same(commands)
     if is_subset == False:
         fault_command = check_fault_command(commands)
-        telegram_tools.send_message(f"The process {fault_command} is not running")
+        telegram_tools.send_message(
+            f"The process {fault_command} is not running in the machine {socket.gethostname()}"
+        )
         print(f"The process {fault_command} is not running")
     else:
         print("Everything is running")
-    time.sleep(60)
+    time.sleep(360)

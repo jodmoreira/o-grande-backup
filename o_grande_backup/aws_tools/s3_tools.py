@@ -10,6 +10,12 @@ s3 = boto3.client("s3")
 
 
 def list_files(bucket_name, prefix, max_keys=1000):
+    """
+    List files in a bucket.
+    params: 
+    bucket_name'
+    prefix
+    """
     all_objects = s3.list_objects_v2(
         Bucket=bucket_name, Prefix=prefix, MaxKeys=max_keys
     )
@@ -61,7 +67,3 @@ def upload_file(bucket_name, content, post_lake_dir):
 def download_file(bucket_name, key, file_path):
     output = s3.download_file(bucket_name, key, file_path)
     return output
-
-
-def upload_compressed_file():
-    pass
