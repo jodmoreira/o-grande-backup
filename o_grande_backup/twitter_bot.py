@@ -13,13 +13,25 @@ CONSUMER_KEY = os.environ.get("TWITTER_CONSUMER_KEY")
 CONSUMER_SECRET = os.environ.get("TWITTER_CONSUMER_SECRET")
 ACCESS_TOKEN = os.environ.get("TWITTER_ACCESS_TOKEN")
 ACCESS_TOKEN_SECRET = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
-# Used to fill db entry for non agents data
-NON_AGENT = os.environ.get("NON_AGENT")
-NON_AGENT_ID = os.environ.get("NON_AGENT_ID")
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+NON_AGENT = os.environ.get("NON_AGENT")  # Used to fill db entry for non agents data
+NON_AGENT_ID = os.environ.get(
+    "NON_AGENT_ID"
+)  # Used to fill db entry for non agents data
 
 
 class OgbListener(tweepy.Stream):
+    def get_profile_id(self, screen_name):
+        profile_id = postgres_tools.free_style_select(
+            f"""SELECT twitter_profile_id 
+            FROM twitter_profilesdd 
+            WHERE agent_screen_name = '{screen_name}'"""
+        )
+        if profile_id == None:
+            postgres_tools.add_new_agent(screen_name)
+            self.get_profile_id(screen_name)
+        return profile_id[0]
+
     def on_status(self, status):
         content = status._json
         now = datetime.now()
@@ -42,11 +54,7 @@ class OgbListener(tweepy.Stream):
             )
 
             screen_name = content["user"]["screen_name"]
-            twitter_profile_id = postgres_tools.free_style_select(
-                f"""SELECT twitter_profile_id 
-                FROM twitter_profiles 
-                WHERE agent_screen_name = '{screen_name}'"""
-            )
+            twitter_profile_id = self.get_profile_id(screen_name)
             content["ogb_agent"] = True
             post_lake_dir = f"social_media/twitter/landing_zone/year={year}/month={month}/day={day}/{screen_name}/{post_platform_id}__{now}.json"
 
@@ -59,8 +67,6 @@ class OgbListener(tweepy.Stream):
             print(
                 f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
             )
-        bucket_name = "ogb-lake"
-        # s3.upload_file(bucket_name, content, post_lake_dir)
         twitter_tools.save_file_to_local_directory(
             content,
             f"{SCRIPT_PATH}/twitter_tools/temp_storage/json_data/{screen_name}-{post_platform_id}__{now}.json",
@@ -69,7 +75,6 @@ class OgbListener(tweepy.Stream):
             datetime.strptime(content["created_at"], "%a %b %d %H:%M:%S %z %Y"),
             "%Y-%m-%d %H:%M:%S",
         )
-        # Will fix it later :)
         try:
             twitter_profile_id = twitter_profile_id[0]
             postgres_tools.add_new_twitter_post(
@@ -79,8 +84,8 @@ class OgbListener(tweepy.Stream):
                 post_lake_dir,
                 twitter_profile_id,
             )
-        except TypeError:
-            telegram_tools.send_message("TypeError. Fix it!")
+        except TypeError as e:
+            telegram_tools.send_message(f"TypeError. Fix it! {e}")
             pass
 
     def on_error(self, status_code):
