@@ -84,9 +84,10 @@ def new_twitter_post_table():
 #     cur.close()
 
 
-def add_new_agent(agent_name, agent_description):
+def add_new_agent(agent_name, agent_description==None):
+    if agent_description == None:
+        agent_description = ""
     cur = conn.cursor()
-
     cur.execute(
         """SELECT agent_name FROM agents WHERE agent_name = %s""", (agent_name,)
     )

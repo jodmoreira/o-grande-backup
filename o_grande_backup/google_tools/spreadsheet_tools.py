@@ -33,7 +33,8 @@ def writer(value, spreadsheet, worksheet="Sheet1"):
         print(e)
         time.sleep(60)
         writer(value, spreadsheet, worksheet)
-    except requests.exceptions.ConnectionError:
+    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as e:
+        print(e)
         time.sleep(180)
         writer(value, spreadsheet, worksheet)
 
