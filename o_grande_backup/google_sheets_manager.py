@@ -30,7 +30,6 @@ def get_all_local_agents_path(all_agents):
 
 
 def check_if_all_spreadsheets_exist(all_agents, all_spreadsheets):
-
     difference = set(all_agents) - set(all_spreadsheets)
     return difference
 
@@ -118,6 +117,7 @@ def get_data_for_the_spreadsheet_entry(post):
 
 all_agents = get_all_local_agents()
 all_spreadsheets = drive_tools.list_files_in_dir()
+all_spreadsheets = [i["name"] for i in all_spreadsheets]
 non_existent_spreadsheets = check_if_all_spreadsheets_exist(
     all_agents, all_spreadsheets
 )
