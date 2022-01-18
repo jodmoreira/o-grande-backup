@@ -67,6 +67,21 @@ def new_twitter_post_table():
     cur.close()
 
 
+def new_twitter_post_table_non_agent():
+    cur = conn.cursor()
+    cur.execute(
+        """CREATE TABLE twitter_posts (
+            twitter_post_id SERIAL PRIMARY KEY, 
+            post_platform_id TEXT NOT NULL, 
+            post_date DATE NOT NULL, 
+            ingestion_date DATE,
+            post_lake_dir TEXT NOT NULL,
+            twitter_profile_id INTEGER;"""
+    )
+    conn.commit()
+    cur.close()
+
+
 # def add_new_webflow_profile():
 #     cur = conn.cursor()
 #     cur.execute(
@@ -84,7 +99,7 @@ def new_twitter_post_table():
 #     cur.close()
 
 
-def add_new_agent(agent_name, agent_description==None):
+def add_new_agent(agent_name, agent_description=None):
     if agent_description == None:
         agent_description = ""
     cur = conn.cursor()
@@ -146,6 +161,29 @@ def add_new_twitter_post(
         '{post_lake_dir}', 
         {twitter_profile_id}, 
         (SELECT agent_id FROM twitter_profiles WHERE twitter_profile_id = '{twitter_profile_id}'))
+        """
+    cur.execute(
+        sql_query,
+    )
+    conn.commit()
+    cur.close()
+
+
+def add_new_twitter_post_non_agent(
+    post_platform_id, post_date, ingestion_datetime, post_lake_dir, twitter_profile_id
+):
+    cur = conn.cursor()
+    sql_query = f"""INSERT INTO twitter_posts (
+        post_platform_id,
+        post_date,
+        ingestion_datetime,
+        post_lake_dir,
+        twitter_profile_id)
+        VALUES ('{post_platform_id}', 
+        '{post_date}', 
+        '{ingestion_datetime}', 
+        '{post_lake_dir}', 
+        {twitter_profile_id})
         """
     cur.execute(
         sql_query,

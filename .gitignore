@@ -1,5 +1,5 @@
 venv/
-__pycache__/
+__pycache__
 *.py[cod]
 *.pyc
 *.pyo
@@ -12,6 +12,6 @@ __pycache__/
 .pytest_env/
 .pytest_env_cache/
 .pytest_cache/
-twitter_tools/temp_storage/*
+o_grande_backup/twitter_tools/temp_storage/*
 *.ipynb
 setup_tools.py

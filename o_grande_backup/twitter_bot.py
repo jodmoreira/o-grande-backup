@@ -24,7 +24,7 @@ class OgbListener(tweepy.Stream):
     def get_profile_id(self, screen_name):
         profile_id = postgres_tools.free_style_select(
             f"""SELECT twitter_profile_id 
-            FROM twitter_profilesdd 
+            FROM twitter_profiles
             WHERE agent_screen_name = '{screen_name}'"""
         )
         if profile_id == None:
@@ -34,16 +34,6 @@ class OgbListener(tweepy.Stream):
 
     def on_status(self, status):
         content = status._json
-        now = datetime.now()
-        bsb_tz = pytz.timezone("America/Sao_Paulo")
-        ingestion_datetime = bsb_tz.localize(now).strftime("%Y-%m-%d %H:%M:%S%z")
-        day = now.day
-        if len(str(day)) == 1:
-            day = f"0{now.day}"
-        month = now.month
-        if len(str(month)) == 1:
-            month = f"0{now.month}"
-        year = now.year
         post_platform_id = content["id_str"]
         if (
             content["text"].startswith("RT @") == False
@@ -52,15 +42,11 @@ class OgbListener(tweepy.Stream):
             print(
                 f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
             )
-
             screen_name = content["user"]["screen_name"]
-            twitter_profile_id = self.get_profile_id(screen_name)
             content["ogb_agent"] = True
-            post_lake_dir = f"social_media/twitter/landing_zone/year={year}/month={month}/day={day}/{screen_name}/{post_platform_id}__{now}.json"
 
         else:
             screen_name = NON_AGENT
-            twitter_profile_id = NON_AGENT_ID
             content["ogb_agent"] = False
             post_lake_dir = f"social_media/twitter/landing_zone/year={year}/month={month}/day={day}/{screen_name}/{post_platform_id}__{now}.json"
             print(post_lake_dir)
@@ -71,22 +57,6 @@ class OgbListener(tweepy.Stream):
             content,
             f"{SCRIPT_PATH}/twitter_tools/temp_storage/json_data/{screen_name}-{post_platform_id}__{now}.json",
         )
-        post_date = datetime.strftime(
-            datetime.strptime(content["created_at"], "%a %b %d %H:%M:%S %z %Y"),
-            "%Y-%m-%d %H:%M:%S",
-        )
-        try:
-            twitter_profile_id = twitter_profile_id[0]
-            postgres_tools.add_new_twitter_post(
-                post_platform_id,
-                post_date,
-                ingestion_datetime,
-                post_lake_dir,
-                twitter_profile_id,
-            )
-        except TypeError as e:
-            telegram_tools.send_message(f"TypeError. Fix it! {e}")
-            pass
 
     def on_error(self, status_code):
         if status_code == 420:

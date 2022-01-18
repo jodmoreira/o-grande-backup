@@ -62,9 +62,6 @@ def routine():
     print(f"Adding files to a json multiline named {json_multiline_path_name}")
     compressor.create_json_file()
     compressor.delete_intersection_files()
-    telegram_tools.send_message(
-        f"Compressed files created: {json_multiline_path_name} from {compressor.files_count} files"
-    )
 
 
 if __name__ == "__main__":
