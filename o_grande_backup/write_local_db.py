@@ -1,3 +1,6 @@
+## Reads all parquet files downloaded to the temp storage directory and writes them to the database of each agent
+
+
 import pandas as pd
 import os
 import sqlite3
@@ -58,7 +61,13 @@ def write_to_db(df, screen_names):
         conn = sqlite3.connect(
             f"{SHARING_ZONE_DIRECTORY}/social_media/twitter/{folder_name}/{folder_name}.db"
         )
-        df_loop.to_sql("tweets", conn, if_exists="append", index=False)
+        try:
+            df_loop.to_sql("tweets", conn, if_exists="append", index=False)
+        except sqlite3.OperationalError:
+            existing_table = pd.read_sql_query("SELECT * FROM tweets", conn)
+            df_concatenate = pd.concat([existing_table, df_loop])
+            df_concatenate.to_sql("tweets", conn, if_exists="replace", index=False)
+        conn.close()
 
 
 def delete_files(files_list):

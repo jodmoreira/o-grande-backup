@@ -23,6 +23,9 @@ class Compressor_tools:
         self.files_count = len(self.json_files)
 
     def create_json_file(self):
+        """
+        Get all files from the directory and create a single multiline json file
+        """
         with open(self.json_multiline_path, "a+") as new_json_file:
             for i in self.json_files:
                 data = open(
@@ -32,22 +35,39 @@ class Compressor_tools:
                 new_json_file.write("\n")
 
     def list_json_multiline_ids(self):
+        """
+        List all json multiline ifiles and get all
+        """
         with open(self.json_multiline_path, "r") as json_multiline:
             json_multiline = json_multiline.read().splitlines()
             json_ids = [str(json.loads(i)["id"]) for i in json_multiline]
         return json_ids
 
     def list_json_files_id(self):
+        """
+        Get all id from json files in the temp directory
+        Returns:
+                json_files_id (list): list of ids
+        """
         json_files_id = [str(i.split("-")[1].split("__")[0]) for i in self.json_files]
         return json_files_id
 
     def check_intersection_files(self):
+        """
+        Compares tweets ids from multiline json file and json files in directory
+        to get the intersection. In other words, the files already saved
+        Returns:
+                intersection (list): list of ids that are in the multiline json file and in the temporary directory
+        """
         json_multilines = self.list_json_multiline_ids()
         directory_files = self.list_json_files_id()
         intersection = set(json_multilines).intersection(directory_files)
         return intersection
 
     def delete_intersection_files(self):
+        """
+        Checks which files were added to multiline json file and deletes them
+        """
         intersection_ids = self.check_intersection_files()
         for intersection_id in intersection_ids:
             for file in self.json_files:
@@ -61,7 +81,9 @@ def routine():
     json_multiline_path_name = compressor.json_multiline_path.split("/")[-1]
     print(f"Adding files to a json multiline named {json_multiline_path_name}")
     compressor.create_json_file()
-    compressor.delete_intersection_files()
+    ## As the system ingest files all the time it is necessary to check which files were added to the json multiline ##
+    ## and which were not. This way not save files won't be deleted##
+    compressor.delete_intersection_files()  ## Check which files were added to the multiline file and delete them
     telegram_tools.send_message(
         f"Compressed files created: {json_multiline_path_name} from {compressor.files_count} files"
     )

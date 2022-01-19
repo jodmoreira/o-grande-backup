@@ -1,3 +1,6 @@
+## This script orchestrates the update of the google sheets
+## It uses local databases to get the data, organizes it and uploads do google sheets
+
 import os
 import google_tools.drive_tools as drive_tools
 import google_tools.spreadsheet_tools as spreadsheet_tools
@@ -14,6 +17,10 @@ agents_local_dir = os.scandir(twitter_local_dir)
 
 ## Get all folders which are screen_names in local dir
 def get_all_local_agents():
+    """
+    Get twitter screen_name of all agents
+    returns (list): list of all agents twitter screen_names
+    """
     local_agents = []
     for directory in agents_local_dir:
         agent_local_db = f"{directory.name}"
@@ -23,6 +30,13 @@ def get_all_local_agents():
 
 ## Get directories for the agents local databases
 def get_all_local_agents_path(all_agents):
+    """
+    Receives a list of all agents and returns a list of their local databases paths
+    Parameters:
+            all_agents (list): list of agents twitter screen_name
+    returns
+        (list): list of all agents local databases paths
+    """
     local_agents_path = []
     for agent in all_agents:
         local_agents_path.append(f"{twitter_local_dir}/{agent}/{agent}.db")
@@ -30,11 +44,25 @@ def get_all_local_agents_path(all_agents):
 
 
 def check_if_all_spreadsheets_exist(all_agents, all_spreadsheets):
+    """
+    Returns the difference between of agents found locally and
+    agents found on google sheets to check if some agent spreadsheet is missing
+    Parameters:
+            all_agents (list): list of all agents found locally
+            all_spreadsheets (list): list of all agents found on google sheets
+    Returns:
+            difference (list): list of agents that are not found on google sheets
+    """
     difference = set(all_agents) - set(all_spreadsheets)
     return difference
 
 
 def create_non_existent_spreadsheets_on_gdrive(new_agent_names):
+    """
+    Creates new spreadsheets on google drive if if found an agent without a spreadsheet
+    Parameters:
+            new_agent_names (list): list of agents that are not found on google sheets
+    """
     for agent in new_agent_names:
         obj_spreadsheet = drive_tools.Create_spreadsheet(agent)
         new_spreadsheet = obj_spreadsheet.create_spreadsheet()
