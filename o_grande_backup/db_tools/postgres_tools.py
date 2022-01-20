@@ -246,5 +246,21 @@ def get_tweets_by_user_id(agent_id):
     return rows
 
 
+def amount_tweets_stored_in_s3_by_date(today):
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT COUNT(*) FROM twitter_posts WHERE ingestion_date = %s""",
+        (today,),
+    )
+    rows = cur.fetchone()
+    cur.execute(
+        """SELECT COUNT(*) FROM twitter_posts_non_agents WHERE ingestion_date = %s""",
+        (today,),
+    )
+    rows_non_agent = cur.fetchone()
+    cur.close()
+    return rows[0] + rows_non_agent[0]
+
+
 if __name__ == "__main__":
     print(get_all_agents())
