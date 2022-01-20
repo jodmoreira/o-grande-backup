@@ -33,6 +33,14 @@ class OgbListener(tweepy.Stream):
         return profile_id[0]
 
     def on_status(self, status):
+        now = datetime.now()
+        day = now.day
+        if len(str(day)) == 1:
+            day = f"0{now.day}"
+        month = now.month
+        if len(str(month)) == 1:
+            month = f"0{now.month}"
+        year = now.year
         content = status._json
         post_platform_id = content["id_str"]
         if (
