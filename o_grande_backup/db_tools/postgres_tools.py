@@ -248,14 +248,13 @@ def get_tweets_by_user_id(agent_id):
 
 def amount_tweets_stored_in_s3_by_date(today):
     cur = conn.cursor()
+    sql_query = 
     cur.execute(
-        """SELECT COUNT(*) FROM twitter_posts WHERE ingestion_date = %s""",
-        (today,),
+        f"""SELECT COUNT(*) FROM twitter_posts WHERE ingestion_date = '{today}'"""
     )
     rows = cur.fetchone()
     cur.execute(
-        """SELECT COUNT(*) FROM twitter_posts_non_agents WHERE ingestion_date = %s""",
-        (today,),
+        f"""SELECT COUNT(*) FROM twitter_posts_non_agents WHERE ingestion_date = '{today}'"""
     )
     rows_non_agent = cur.fetchone()
     cur.close()
