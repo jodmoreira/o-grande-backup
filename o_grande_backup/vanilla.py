@@ -22,13 +22,15 @@ def check_if_process_is_running():
 
 
 def check_if_is_same(commands):
-    is_same = set(EXPECTED_COMMANDS) == set(commands)
+    """
+    Checks if the amount of commands is the same as the amount of expected commands
+    """
+    is_same = set(EXPECTED_COMMANDS) <= set(commands)
     return is_same
 
 
 def check_fault_command(commands):
     fault_command = set(EXPECTED_COMMANDS).difference(commands)
-    print(fault_command)
     return fault_command
 
 

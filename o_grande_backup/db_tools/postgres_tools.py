@@ -1,19 +1,28 @@
 import psycopg2
 import os
+import psycopg2
+from sshtunnel import SSHTunnelForwarder
+
 
 database = os.environ["DB_NAME"]
 user = os.environ["DB_USER"]
 password = os.environ["DB_PASS"]
 host = os.environ["DB_HOST"]
 port = os.environ["DB_PORT"]
+remote_server = os.environ["REMOTE_SERVER"]
+remote_server_key = os.environ["REMOTE_SERVER_KEY"]
+remote_server_user = os.environ["REMOTE_SERVER_USER"]
 
 
-conn = psycopg2.connect(
-    database=database, user=user, password=password, host=host, port=port
-)
+def connection():
+    conn = psycopg2.connect(
+        database=database, user=user, password=password, host=host, port=port
+    )
+    return conn
 
 
 def new_agents_table():
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """CREATE TABLE agents (
@@ -26,6 +35,7 @@ def new_agents_table():
 
 
 def new_twitter_profiles_table():
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """CREATE TABLE twitter_profiles (
@@ -39,6 +49,7 @@ def new_twitter_profiles_table():
 
 
 def new_webflow_profiles_table():
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """CREATE TABLE twitter_profiles (
@@ -52,6 +63,7 @@ def new_webflow_profiles_table():
 
 
 def new_twitter_post_table():
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """CREATE TABLE twitter_posts (
@@ -68,6 +80,7 @@ def new_twitter_post_table():
 
 
 def new_twitter_post_table_non_agent():
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """CREATE TABLE twitter_posts_non_agents (
@@ -100,6 +113,7 @@ def new_twitter_post_table_non_agent():
 
 
 def add_new_agent(agent_name, agent_description=None):
+    conn = connection()
     if agent_description == None:
         agent_description = ""
     cur = conn.cursor()
@@ -118,6 +132,7 @@ def add_new_agent(agent_name, agent_description=None):
 
 
 def add_new_twitter_profile(agent_name, agent_twitter_screen_name, agent_platform_id):
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """SELECT 
@@ -148,6 +163,7 @@ def add_new_twitter_post(
     twitter_profile_id,
     agent_id,
 ):
+    conn = connection()
     cur = conn.cursor()
     sql_query = f"""INSERT INTO twitter_posts (
         post_platform_id,
@@ -174,6 +190,7 @@ def add_new_twitter_post(
 def add_new_twitter_post_non_agent(
     post_platform_id, agent_plaform_id, post_date, ingestion_date, post_lake_dir
 ):
+    conn = connection()
     cur = conn.cursor()
     sql_query = f"""INSERT INTO twitter_posts_non_agents (
         post_platform_id,
@@ -196,6 +213,7 @@ def add_new_twitter_post_non_agent(
 
 
 def free_style_select(sql_query):
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         sql_query,
@@ -206,6 +224,7 @@ def free_style_select(sql_query):
 
 
 def select_twitter_profiles():
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """SELECT * FROM twitter_profiles""",
@@ -216,6 +235,7 @@ def select_twitter_profiles():
 
 
 def get_all_agents():
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """SELECT * FROM agents""",
@@ -226,6 +246,7 @@ def get_all_agents():
 
 
 def get_all_twitter_users_id():
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """SELECT agent_platform_id FROM twitter_profiles""",
@@ -236,6 +257,7 @@ def get_all_twitter_users_id():
 
 
 def get_tweets_by_user_id(agent_id):
+    conn = connection()
     cur = conn.cursor()
     cur.execute(
         """SELECT post_platform_id FROM twitter_posts WHERE agent_id = %s""",
@@ -247,6 +269,9 @@ def get_tweets_by_user_id(agent_id):
 
 
 def amount_tweets_stored_in_s3_by_date(today):
+    tunnel_conn = make_the_the_tunnel()
+    conn = tunnel_conn["conn"]
+    server = tunnel_conn["server"]
     cur = conn.cursor()
     cur.execute(
         """SELECT COUNT(*) FROM twitter_posts WHERE ingestion_date = %s""",
@@ -258,8 +283,35 @@ def amount_tweets_stored_in_s3_by_date(today):
         (today,),
     )
     rows_non_agent = cur.fetchone()
+    ## Closes the connection to the database and also the tunnel
     cur.close()
+    server.close()
     return rows[0] + rows_non_agent[0]
+
+
+def make_the_the_tunnel():
+    """
+    Creates a SSH tunnel to connect to database through remote server
+    """
+    server = SSHTunnelForwarder(
+        (remote_server, 22),
+        ssh_private_key=remote_server_key,
+        ssh_username=remote_server_user,
+        remote_bind_address=(host, int(port)),
+    )
+    server.start()
+    conn = psycopg2.connect(
+        database=database,
+        user=user,
+        password=password,
+        host="localhost",
+        port=server.local_bind_port,
+    )
+    output = dict()
+    ## Packs the tunnel and connection into a dictionary to be returned
+    output["conn"] = conn
+    output["server"] = server
+    return output
 
 
 if __name__ == "__main__":
