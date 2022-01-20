@@ -139,6 +139,7 @@ def insert_new_post(
 
 
 def read_twitter_posts(agent_name):
+    """Check all tweets from a specific agent"""
     conn = spreadsheet_table()
     cur = conn.cursor()
     try:
@@ -152,6 +153,22 @@ def read_twitter_posts(agent_name):
     conn.commit()
     cur.close()
     return result
+
+
+def amount_tweets_stored_in_sheets_by_date(date):
+    conn = spreadsheet_table()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            f"""SELECT COUNT(*) FROM spreadsheet_posts WHERE strftime('%Y-%m-%d', spreadsheet_write_date) = '{date}'"""
+        )
+        result = cur.fetchall()
+    except sqlite3.OperationalError:
+        create_spreadsheet_post_table()
+        amount_tweets_stored_in_sheets_by_date(date)
+    conn.commit()
+    cur.close()
+    return result[0][0]
 
 
 def get_spreadsheet_id_from_twitter_logs(agent_name):

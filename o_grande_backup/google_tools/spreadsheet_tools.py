@@ -31,10 +31,12 @@ def writer(value, spreadsheet, worksheet="Sheet1"):
         time.sleep(1)
     except APIError as e:
         print(e)
+        print("\n", value)
         time.sleep(60)
         writer(value, spreadsheet, worksheet)
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as e:
         print(e)
+        print("\n", value)
         time.sleep(180)
         writer(value, spreadsheet, worksheet)
 
