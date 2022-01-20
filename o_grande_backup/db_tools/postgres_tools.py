@@ -274,13 +274,11 @@ def amount_tweets_stored_in_s3_by_date(today):
     server = tunnel_conn["server"]
     cur = conn.cursor()
     cur.execute(
-        """SELECT COUNT(*) FROM twitter_posts WHERE ingestion_date = %s""",
-        (today,),
+        f"""SELECT COUNT(*) FROM twitter_posts WHERE ingestion_date = '{today}'"""
     )
     rows = cur.fetchone()
     cur.execute(
-        """SELECT COUNT(*) FROM twitter_posts_non_agents WHERE ingestion_date = %s""",
-        (today,),
+        f"""SELECT COUNT(*) FROM twitter_posts_non_agents WHERE ingestion_date = '{today}'"""
     )
     rows_non_agent = cur.fetchone()
     ## Closes the connection to the database and also the tunnel
