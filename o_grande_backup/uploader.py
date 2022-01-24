@@ -32,6 +32,7 @@ def orchestrator():
         content = f"{twitter_files_path}/{file}"
         process_file_to_db(content, post_lake_dir)
         file_size = os.path.getsize(content)
+        file_size = file_size / 1024 ** 2
         request = s3_tools.upload_compressed_file_from_local_directory(
             "ogb-lake", content, post_lake_dir
         )
@@ -46,7 +47,7 @@ def remove_files(twitter_files_path, file, file_size):
     print(f"{file} uploaded successfully")
     print(f"removing {file} from local directory")
     telegram_tools.send_message(
-        f"The {file_size} bytes file uploaded successfully at {datetime.now()}"
+        f"The {file_size} MB file uploaded successfully at {datetime.now()}"
     )
     os.remove(f"{twitter_files_path}/{file}")
 

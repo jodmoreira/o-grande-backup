@@ -82,6 +82,15 @@ def add_new_spreadsheet_data_to_db(new_agent_name):
 
 
 def check_posts_to_be_updated(df_agent, df_logs):
+    """
+    Returns the posts that are not in the logs
+    Parameters:
+            df_agent (dataframe): dataframe of the agent tweets db store locally
+            df_logs (dataframe): dataframe of the logs db
+                                containing every spreadsheet entry written
+    Returns:
+            posts_to_be_updated (dataframe): dataframe of the posts to be updated
+    """
     ## Get the agent's posts from the log file
     logged_posts = df_logs["post_id"].values
     ## Create a dataframe with just the posts that are not already in google sheets
@@ -92,6 +101,13 @@ def check_posts_to_be_updated(df_agent, df_logs):
 
 
 def load_agent_dataframe(agente_db_path):
+    """
+    Loads the agent's database stored locally
+    Parameters:
+            agente_db_path (str): path to the agent's database
+    Returns:
+            df (dataframe): dataframe of the agent's database
+    """
     df = pd.read_sql(
         f"SELECT * FROM tweets",
         con=sqlite_tools.stand_alone_connection(agente_db_path),
@@ -101,6 +117,14 @@ def load_agent_dataframe(agente_db_path):
 
 
 def load_log_dataframe(agent_name):
+    """
+    Loads the agent's tweets ids from the logs database
+    stored locally and returns as dataframe
+    Parameters:
+            agent_name (str): name of the agent
+    Returns:
+            df (dataframe): dataframe of the agent's tweets ids
+    """
     df = pd.read_sql(
         f"SELECT post_id FROM spreadsheet_posts WHERE agent_name = '{agent_name}'",
         con=sqlite_tools.stand_alone_connection(
@@ -111,6 +135,14 @@ def load_log_dataframe(agent_name):
 
 
 def write_post_in_logs(post):
+    """
+    Writes the post in the logs database.
+    It stores all the posts that are already in the google sheets
+    Parameters:
+            post (dict): post to be written in the logs database
+    Returns:
+            "Done"
+    """
     sqlite_tools.insert_new_post(
         post["spreadsheet_id"],
         post["post_id"],
