@@ -90,9 +90,9 @@ def routine():
     ## As the system ingest files all the time it is necessary to check which files were added to the json multiline ##
     ## and which were not. This way not save files won't be deleted##
     compressor.delete_intersection_files()  ## Check which files were added to the multiline file and delete them
-    telegram_tools.send_message(
-        f"Compressed files created: {json_multiline_path_name} from {compressor.files_count} files"
-    )
+    # telegram_tools.send_message(
+    #     f"Compressed files created: {json_multiline_path_name} from {compressor.files_count} files"
+    # )
 
 
 if __name__ == "__main__":

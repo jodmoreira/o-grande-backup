@@ -39,6 +39,7 @@ def writer(value, spreadsheet, worksheet="Sheet1"):
         print("\n", value)
         time.sleep(180)
         writer(value, spreadsheet, worksheet)
+    return
 
 
 def add_header_row(spreadsheet):
