@@ -179,7 +179,6 @@ def add_new_twitter_post(
         {twitter_profile_id}, 
         {agent_id})
         """
-    print(sql_query)
     cur.execute(
         sql_query,
     )
@@ -204,7 +203,6 @@ def add_new_twitter_post_non_agent(
         '{ingestion_date}', 
         '{post_lake_dir}')
         """
-    print(sql_query)
     cur.execute(
         sql_query,
     )

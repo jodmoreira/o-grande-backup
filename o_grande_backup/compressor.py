@@ -27,7 +27,7 @@ class Compressor_tools:
         Get all files from the directory and create a single multiline json file
         """
         with open(self.json_multiline_path, "a+") as new_json_file:
-            for i in self.json_files:
+            for i in self.json_files[:5000]:
                 data = open(
                     f"{self.script_path}/twitter_tools/temp_storage/json_data/{i}", "r"
                 )
@@ -40,7 +40,12 @@ class Compressor_tools:
         """
         with open(self.json_multiline_path, "r") as json_multiline:
             json_multiline = json_multiline.read().splitlines()
-            json_ids = [str(json.loads(i)["id"]) for i in json_multiline]
+            json_ids = []
+            for i in json_multiline:
+                try:
+                    json_ids.append(str(json.loads(i)["id"]))
+                except json.decoder.JSONDecodeError:
+                    pass
         return json_ids
 
     def list_json_files_id(self):
@@ -69,6 +74,7 @@ class Compressor_tools:
         Checks which files were added to multiline json file and deletes them
         """
         intersection_ids = self.check_intersection_files()
+        print("Removing files")
         for intersection_id in intersection_ids:
             for file in self.json_files:
                 if intersection_id in file:

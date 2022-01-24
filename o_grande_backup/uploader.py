@@ -27,9 +27,10 @@ def orchestrator():
     script_path = os.path.dirname(os.path.realpath(__file__))
     twitter_files_path = f"{script_path}/twitter_tools/temp_storage/compressed_files"
     files = os.listdir(twitter_files_path)
-    for file in files:
+    for file in set(files):
         post_lake_dir = f"social_media/twitter/landing_zone/year={year}/month={month}/day={day}/{file}"
         content = f"{twitter_files_path}/{file}"
+        print(f"reading {file}")
         process_file_to_db(content, post_lake_dir)
         file_size = os.path.getsize(content)
         request = s3_tools.upload_compressed_file_from_local_directory(
@@ -61,17 +62,22 @@ def process_file_to_db(file, post_lake_dir):
     with open(file, "r") as f:
         f_str = f.read().splitlines()
         for line in f_str:
-            row = json.loads(line)
-            output = {}
-            output["post_platform_id"] = row["id_str"]
-            output["post_date"] = row["created_at"]
-            output["ingestion_datetime"] = ingestion_datetime
-            output["post_lake_dir"] = post_lake_dir = post_lake_dir
-            output["screen_name"] = row["user"]["screen_name"]
-            output["agent_platform_id"] = row["user"]["id_str"]
-            output["ogb_agent"] = row["ogb_agent"]
-            time.sleep(0.01)
-            write_to_db(output)
+            try:
+                row = json.loads(line)
+                output = {}
+                output["post_platform_id"] = row["id_str"]
+                output["post_date"] = row["created_at"]
+                output["ingestion_datetime"] = ingestion_datetime
+                output["post_lake_dir"] = post_lake_dir = post_lake_dir
+                output["screen_name"] = row["user"]["screen_name"]
+                output["agent_platform_id"] = row["user"]["id_str"]
+                output["ogb_agent"] = row["ogb_agent"]
+                ## A little delay to avoid stressing the cheap database
+                time.sleep(0.01)
+                write_to_db(output)
+            except json.decoder.JSONDecodeError as e:
+                print(f"Json error > {e}")
+                pass
 
 
 def get_agent_and_profile_id(agent_platform_id):
@@ -122,10 +128,13 @@ def write_to_db(data):
             )
         else:
             telegram_tools.send_message(
-                f"The agent_platform_id {data['twitter_profile_id']} {data['screen_name']}does not exist in the database"
+                f"The agent_platform_id {data['post_platform_id']} {data['screen_name']}does not exist in the database"
             )
             return
 
 
 if __name__ == "__main__":
-    orchestrator()
+    try:
+        orchestrator()
+    except Exception as e:
+        telegram_tools.send_message(f"Uploader failed  {e}")
