@@ -34,13 +34,6 @@ class OgbListener(tweepy.Stream):
 
     def on_status(self, status):
         now = datetime.now()
-        day = now.day
-        if len(str(day)) == 1:
-            day = f"0{now.day}"
-        month = now.month
-        if len(str(month)) == 1:
-            month = f"0{now.month}"
-        year = now.year
         content = status._json
         post_platform_id = content["id_str"]
         if (
@@ -56,8 +49,6 @@ class OgbListener(tweepy.Stream):
         else:
             screen_name = NON_AGENT
             content["ogb_agent"] = False
-            post_lake_dir = f"social_media/twitter/landing_zone/year={year}/month={month}/day={day}/{screen_name}/{post_platform_id}__{now}.json"
-            print(post_lake_dir)
             print(
                 f"""new tweet from {content["user"]["screen_name"]} at {str(datetime.now()+ timedelta(hours=3))}"""
             )
