@@ -34,6 +34,7 @@ def orchestrator():
         process_file_to_db(content, post_lake_dir)
         file_size = os.path.getsize(content)
         file_size = file_size / 1024 ** 2
+        file_size = round(file_size, 2)
         request = s3_tools.upload_compressed_file_from_local_directory(
             "ogb-lake", content, post_lake_dir
         )
@@ -69,7 +70,7 @@ def process_file_to_db(file, post_lake_dir):
                 output["post_platform_id"] = row["id_str"]
                 output["post_date"] = row["created_at"]
                 output["ingestion_datetime"] = ingestion_datetime
-                output["post_lake_dir"] = post_lake_dir = post_lake_dir
+                output["post_lake_dir"] = post_lake_dir
                 output["screen_name"] = row["user"]["screen_name"]
                 output["agent_platform_id"] = row["user"]["id_str"]
                 output["ogb_agent"] = row["ogb_agent"]

@@ -6,89 +6,55 @@ import json
 import os
 from datetime import datetime, timedelta
 import pytz
-import db_tools.postgres_tools as postgres_tools
 
 CONSUMER_KEY = os.environ.get("TWITTER_CONSUMER_KEY")
 CONSUMER_SECRET = os.environ.get("TWITTER_CONSUMER_SECRET")
 NON_AGENT = os.environ.get("NON_AGENT")
 NON_AGENT_ID = os.environ.get("NON_AGENT_ID")
 
-auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-api = API(auth)
+# auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+# api = API(auth)
 
 
 class Twitter_history_posts:
-    ##### For the first execution #####
-    def __init__(self, user_id):
-        self.user_id = user_id
-
-    def get_last_tweets(self):
-        """
-        Runs the frist API loop and returns the first 200 tweets and
-        then starts looping
-        """
-        auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-        api = API(auth)
-        self.output = []
-        try:
-            tweets = api.user_timeline(
-                user_id=self.user_id, tweet_mode="extended", count=200
-            )
-            for tweet in tweets:
-                id_tweet = tweet.id
-                print(f"{id_tweet} from {self.user_id}")
-                self.output.append(tweet._json)
-                last_id = id_tweet - 1
-            self.looper(last_id)
-            return self.output
-        except tweepy.errors.TweepyException:
-            print(f"Unable to get data because {self.user_id} is not available")
-            pass
-
-    def looper(self, last_id):
-        """
-        Iterates over API and returns a list of tweets
-        """
-        tweets = api.user_timeline(
-            user_id=self.user_id, tweet_mode="extended", count=200, max_id=last_id
-        )
-        if len(tweets) > 0:
-            for tweet in tweets:
-                id_tweet = tweet.id
-                print(f"{id_tweet} from {self.user_id}")
-                last_id = id_tweet - 1
-                self.output.append(tweet._json)
-            try:
-                print("Going to new item")
-                self.looper(last_id)
-            except Exception as e:
-                print(e)
-                print("sleep")
-                time.sleep(15 * 60)
-                self.looper(last_id)
+    ##### For the first execution or recoverying from failures #####
+    def __init__(self, user_id=None, screen_name=None):
+        self.auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+        self.api = API(self.auth)
+        self.screen_name = screen_name
+        if screen_name != None:
+            self.user_id = self.get_user_id()
         else:
-            print("No more tweets")
-            return self.output
+            self.user_id = user_id
 
-    def get_user_id(screen_name):
-        auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-        api = API(auth)
-        id = api.get_user(screen_name).id
+    def get_last_tweets(self, delay_time=None):
+        def requester(max_id=None, output=None):
+            if output == None:
+                output = []
+            tweets = self.api.user_timeline(
+                user_id=self.user_id,
+                tweet_mode="extended",
+                count=200,
+                max_id=max_id,
+            )
+            if len(tweets) > 0:
+                for tweet in tweets:
+                    id_tweet = tweet.id
+                    # print(f"{id_tweet} from {self.user_id}")
+                    output.append(tweet._json)
+                    max_id = id_tweet - 1
+                time.sleep(delay_time)
+                requester(max_id, output)
+            else:
+                print("No more tweets")
+            return output
+
+        return requester()
+
+    def get_user_id(self):
+        id = self.api.get_user(screen_name=self.screen_name).id
+        print(id)
         return id
-
-    def get_lost_tweets(self, last_tweets, db_ids):
-        """
-        Returns a list of tweets that are not in the database
-        params:
-            db_ids (list): Ids from the database
-            last_tweets (list): Last tweets from the API
-        returns:
-            lost_tweets (list): Tweets that are not in the database
-        """
-        tweets_ids = [tweet["id"] for tweet in last_tweets]
-        difference = set(tweets_ids).difference(set(db_ids))
-        lost_tweets = [tweet for tweet in last_tweets if tweet["id"] in difference]
-        return lost_tweets
 
     def lake_path_creator(self, tweet):
         """
@@ -205,3 +171,11 @@ def run_since_id(user):
         print("sleep")
         time.sleep(15 * 60)
         run_since_id(user)
+
+
+# if __name__ == "__main__":
+# auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+# api = API(auth)
+# print(user_id)
+# obj = Twitter_history_posts(screen_name="????")
+# obj.test()

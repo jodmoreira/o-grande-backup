@@ -243,7 +243,7 @@ def get_all_agents():
     return rows
 
 
-def get_all_twitter_users_id():
+def get_all_twitter_agent_platform_id():
     conn = connection()
     cur = conn.cursor()
     cur.execute(
@@ -257,10 +257,11 @@ def get_all_twitter_users_id():
 def get_tweets_by_user_id(agent_id):
     conn = connection()
     cur = conn.cursor()
-    cur.execute(
-        """SELECT post_platform_id FROM twitter_posts WHERE agent_id = %s""",
-        (agent_id,),
-    )
+    sql_query = f"""SELECT twitter_profile_id FROM twitter_profiles WHERE agent_platform_id = \'{agent_id}\'"""
+    cur.execute(sql_query)
+    twitter_profile_id = cur.fetchone()[0]
+    sql_query = f"""SELECT post_platform_id FROM twitter_posts WHERE twitter_profile_id = {twitter_profile_id}"""
+    cur.execute(sql_query)
     rows = cur.fetchall()
     cur.close()
     return rows
