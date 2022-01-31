@@ -254,13 +254,20 @@ def get_all_twitter_agent_platform_id():
     return rows
 
 
-def get_tweets_by_user_id(agent_id):
+def get_tweets_by_user_id(agent_platform_id):
     conn = connection()
     cur = conn.cursor()
-    sql_query = f"""SELECT twitter_profile_id FROM twitter_profiles WHERE agent_platform_id = \'{agent_id}\'"""
+    sql_query = f"""SELECT twitter_profile_id, agent_platform_id FROM twitter_profiles WHERE agent_platform_id = '{agent_platform_id}'"""
     cur.execute(sql_query)
     twitter_profile_id = cur.fetchone()[0]
-    sql_query = f"""SELECT post_platform_id FROM twitter_posts WHERE twitter_profile_id = {twitter_profile_id}"""
+    sql_query = f"""SELECT post_platform_id
+    FROM twitter_posts 
+    WHERE twitter_profile_id = {twitter_profile_id}
+    UNION
+    SELECT post_platform_id
+    FROM twitter_posts_non_agents tpna 
+    WHERE agent_platform_id = '{agent_platform_id}'
+    """
     cur.execute(sql_query)
     rows = cur.fetchall()
     cur.close()

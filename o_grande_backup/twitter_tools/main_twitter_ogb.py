@@ -49,7 +49,12 @@ class Twitter_history_posts:
                 print("No more tweets")
             return output
 
-        return requester()
+        try:
+            output = requester()
+            return output
+        except tweepy.errors.Unautorized:
+            print("Unautorized")
+            return None
 
     def get_user_id(self):
         id = self.api.get_user(screen_name=self.screen_name).id

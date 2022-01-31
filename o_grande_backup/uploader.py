@@ -48,9 +48,6 @@ def remove_files(twitter_files_path, file, file_size):
     """
     print(f"{file} uploaded successfully")
     print(f"removing {file} from local directory")
-    telegram_tools.send_message(
-        f"The {file_size} MB file uploaded successfully at {datetime.now()}"
-    )
     os.remove(f"{twitter_files_path}/{file}")
 
 
