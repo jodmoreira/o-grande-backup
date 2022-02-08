@@ -171,6 +171,20 @@ def amount_tweets_stored_in_sheets_by_date(date):
     return result[0][0]
 
 
+def amount_tweets_stored_in_sheets():
+    conn = spreadsheet_table()
+    cur = conn.cursor()
+    try:
+        cur.execute(f"""SELECT COUNT(*) FROM spreadsheet_posts""")
+        result = cur.fetchall()
+    except sqlite3.OperationalError:
+        create_spreadsheet_post_table()
+        amount_tweets_stored_in_sheets()
+    conn.commit()
+    cur.close()
+    return result[0][0]
+
+
 def get_spreadsheet_id_from_twitter_logs(agent_name):
     conn = spreadsheet_table()
     cur = conn.cursor()

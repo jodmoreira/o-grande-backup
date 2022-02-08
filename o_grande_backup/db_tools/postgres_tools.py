@@ -286,6 +286,21 @@ def amount_tweets_stored_in_s3_by_date(today):
     return rows[0] + rows_non_agent[0]
 
 
+def amount_tweets_stored_in_s3():
+    tunnel_conn = make_the_the_tunnel()
+    conn = tunnel_conn["conn"]
+    server = tunnel_conn["server"]
+    cur = conn.cursor()
+    cur.execute(f"""SELECT COUNT(*) FROM twitter_posts""")
+    rows = cur.fetchone()
+    cur.execute(f"""SELECT COUNT(*) FROM twitter_posts_non_agents""")
+    rows_non_agent = cur.fetchone()
+    ## Closes the connection to the database and also the tunnel
+    cur.close()
+    server.close()
+    return rows[0] + rows_non_agent[0]
+
+
 def make_the_the_tunnel():
     """
     Creates a SSH tunnel to connect to database through remote server

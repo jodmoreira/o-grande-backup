@@ -12,13 +12,14 @@ s3 = boto3.client("s3")
 def list_files(bucket_name, prefix, max_keys=1000):
     """
     List files in a bucket.
-    params: 
+    params:
     bucket_name'
     prefix
     """
     all_objects = s3.list_objects_v2(
         Bucket=bucket_name, Prefix=prefix, MaxKeys=max_keys
     )
+    print(bucket_name, prefix, max_keys)
     keys = [i.get("Key") for i in all_objects.get("Contents")]
     return keys
 

@@ -103,6 +103,7 @@ def get_agent_and_profile_id(agent_platform_id):
 
 def write_to_db(data):
     """
+    Parameters: (dict) data
     Writes the data to the database.
     Checks if ogb_agent is True or False.
     If True it will also check if the agent exists in the database.
