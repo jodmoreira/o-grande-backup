@@ -1,3 +1,5 @@
+# Telepot is no longer maintained, so i need to replace it with a new one.
+# Maybe https://docs.telethon.dev/en/stable/
 import telepot
 from telepot.loop import MessageLoop
 import os

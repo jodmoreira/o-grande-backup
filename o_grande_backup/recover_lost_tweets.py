@@ -58,7 +58,7 @@ def recover_lost_tweets():
 
     ## Gets all twitter_user_ids from the database
     twitter_user_ids = postgres_tools.get_all_twitter_agent_platform_id()
-    for twitter_user_id in twitter_user_ids:
+    for twitter_user_id in set(twitter_user_ids):
         ## Initializes the Twitter_history_posts class
         twitter_obg = twitter_tools.Twitter_history_posts(user_id=twitter_user_id[0])
         ## Gets all tweets from the user from the database
@@ -66,12 +66,19 @@ def recover_lost_tweets():
         tweet_ids = [int(tweet[0]) for tweet in tweet_ids]
         ## Gets all tweets from the user from the API. Also sets delay to avoid stressing the API ##
         last_tweets = twitter_obg.get_last_tweets(delay_time=1)
-        lost_tweets = get_lost_tweets(last_tweets, tweet_ids)
-        print(len(lost_tweets), "Tweets that are in the API but not in the database")
-        for tweets_to_write in lost_tweets:
-            ## A little delay to avoid running out of space in the local storage
-            time.sleep(1)
-            write_local_file(tweets_to_write)
+        ## Sometimes the user is no longer available in the API.
+        ## In this case, the script will skip the user
+        if last_tweets != None:
+            screen_name = last_tweets[0]["user"]["screen_name"]
+            lost_tweets = get_lost_tweets(last_tweets, tweet_ids)
+            print(
+                f"{len(lost_tweets)} Tweets from {screen_name} that are in the API but not in the database"
+            )
+            time.sleep(5)
+            for tweet_to_write in lost_tweets:
+                ## A little delay to avoid running out of space in the local storage
+                time.sleep(1.5)
+                write_local_file(tweet_to_write)
     return
 
 
